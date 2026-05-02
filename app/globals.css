@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --page-bg: #f6faf2;
+  --surface: rgba(255, 255, 255, 0.92);
+  --surface-border: rgba(183, 243, 195, 0.7);
+  --focus-ring: rgba(21, 111, 45, 0.16);
+  --focus-stroke: rgba(21, 111, 45, 0.72);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply min-h-screen bg-cream text-ink antialiased;
+  background-image:
+    radial-gradient(circle at top left, rgba(5, 150, 105, 0.12), transparent 26%),
+    radial-gradient(circle at 88% 14%, rgba(245, 158, 11, 0.12), transparent 18%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 251, 244, 0.96)),
+    linear-gradient(rgba(18, 32, 24, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(18, 32, 24, 0.03) 1px, transparent 1px);
+  background-color: var(--page-bg);
+  background-size:
+    auto,
+    auto,
+    auto,
+    32px 32px,
+    32px 32px;
+  background-position:
+    0 0,
+    0 0,
+    0 0,
+    center,
+    center;
+}
+
+a {
+  @apply transition-colors;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px var(--focus-ring),
+    0 0 0 1px var(--focus-stroke);
+}
+
+::selection {
+  background: rgba(5,150,105,0.18);
+}
+
+.glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.35));
+  backdrop-filter: blur(6px);
+}
+
+/* Button utilities for consistent CTAs */
+.btn {
+  @apply inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition-colors;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, var(--brand-500, #28b446), var(--brand-600, #1a8f35));
+  color: white;
+  box-shadow: 0 12px 30px -18px rgba(18,32,24,0.5);
+}
+
+.primary-accent {
+  background: linear-gradient(90deg, rgba(40,180,70,0.12), rgba(245,158,11,0.06));
+  border-radius: 1.25rem;
+}
+
+/* Compact typography helpers */
+.lead {
+  @apply text-lg font-medium text-ink;
+}
+
+.muted { color: rgba(18,32,24,0.6); }
+
+.surface-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(248, 251, 244, 0.9));
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 24px 48px -34px rgba(18, 32, 24, 0.34);
+}
+
+.hero-band {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(243, 251, 241, 0.88)),
+    linear-gradient(120deg, rgba(245, 158, 11, 0.06), transparent 34%);
+  border-bottom: 1px solid rgba(183, 243, 195, 0.65);
+}
+
+.section-grid {
+  background-image:
+    linear-gradient(rgba(18, 32, 24, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(18, 32, 24, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  left: 1rem;
+  top: 1rem;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 0.75rem;
+  background: white;
+  color: var(--brand-900, #064e3b);
+  border-radius: 0.5rem;
+  box-shadow: 0 6px 20px rgba(2,6,23,0.12);
+  z-index: 60;
+}
