@@ -164,7 +164,7 @@ export function SiteFooter() {
             </div>
             <p className="text-sm font-medium text-white mb-4">Quick WhatsApp Help</p>
             <motion.a
-              href="https://wa.me/923001234567"
+              href="https://wa.me/923363629981"
               className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#D1B06B] to-[#D1B06B]/90 py-2.5 text-[11px] font-bold uppercase tracking-wider text-[#081D18] shadow-lg shadow-[#D1B06B]/20"
               whileHover={{ scale: 1.02, boxShadow: "0 8px 20px -5px rgba(209,176,107,0.3)" }}
               whileTap={{ scale: 0.98 }}

@@ -37,7 +37,7 @@ export function FloatingWhatsAppButton() {
           city: "Rawalpindi / Islamabad",
           area: "Share your area in chat"
         })
-      : "https://wa.me/923001234567?text=Hello%20Fresh%20Home%20Mart%2C%20I%20would%20like%20to%20place%20an%20order.";
+      : "https://wa.me/923363629981?text=Hello%20FreshGo%2C%20I%20would%20like%20to%20place%20an%20order.";
 
   return (
     <a

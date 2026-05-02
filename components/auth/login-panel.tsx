@@ -1,98 +1,79 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { LockKeyhole, LogOut, ShieldCheck, ShoppingBag } from "lucide-react";
-
+import { LogOut, UserCircle, Loader2 } from "lucide-react";
 import { useStore } from "@/lib/store/store-provider";
-
-const demoAccounts = [
-  {
-    label: "Customer demo",
-    email: "customer@freshhomemart.pk",
-    password: "Customer@12345",
-    description: "Use for cart, checkout, wishlist, and order history."
-  },
-  {
-    label: "Admin demo",
-    email: "admin@freshhomemart.pk",
-    password: "Admin@12345",
-    description: "Use for product updates, order management, and dashboard access."
-  },
-  {
-    label: "Admin (ID login)",
-    email: "54471",
-    password: "Rajput@9981",
-    description: "Alternate admin login using numeric ID and password."
-  }
-];
 
 export function LoginPanel() {
   const router = useRouter();
   const { login, user, logout } = useStore();
-  const [email, setEmail] = useState(demoAccounts[0].email);
-  const [password, setPassword] = useState(demoAccounts[0].password);
+  
+  // State initialized as empty for professional use
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  function submit(event: React.FormEvent<HTMLFormElement>) {
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitting(true);
-    const result = login(email, password);
+    setError("");
 
-    if (!result.ok) {
-      setError(result.error ?? "Login failed.");
+    try {
+      const result = login(email, password);
+
+      if (!result.ok) {
+        setError(result.error ?? "Invalid email or password.");
+        setSubmitting(false);
+        return;
+      }
+
+      // Redirect based on role
+      const destination = email.includes("admin") ? "/admin" : "/orders";
+      router.replace(destination);
+      router.refresh();
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
       setSubmitting(false);
-      return;
     }
-
-    setError("");
-    router.replace(email.includes("admin") ? "/admin" : "/orders");
-    router.refresh();
-    setSubmitting(false);
   }
 
-  function loginAs(emailValue: string, passwordValue: string) {
-    setEmail(emailValue);
-    setPassword(passwordValue);
-    setError("");
-
-    const result = login(emailValue, passwordValue);
-
-    if (!result.ok) {
-      setError(result.error ?? "Login failed.");
-      return;
-    }
-
-    router.replace(emailValue.includes("admin") ? "/admin" : "/orders");
-    router.refresh();
-  }
-
+  // --- Authenticated State ---
   if (user) {
     return (
-      <div className="mt-6">
-        <div className="rounded-[2rem] bg-white p-10 shadow-soft">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-700">Account active</p>
-          <h1 className="mt-2 font-display text-4xl text-ink">You are signed in as {user.name}.</h1>
-          <p className="mt-4 text-base leading-7 text-ink/68">
-            Your current role is <span className="font-semibold text-ink">{user.role}</span>. Continue to orders or
-            the admin dashboard from here.
+      <div className="mt-6 max-w-2xl mx-auto">
+        <div className="rounded-[2.5rem] bg-white p-10 shadow-soft border border-brand-50">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-100 text-brand-700">
+              <UserCircle className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-brand-600">Active Session</p>
+              <h1 className="font-display text-2xl text-ink">Welcome back, {user.name}</h1>
+            </div>
+          </div>
+          
+          <p className="text-base leading-relaxed text-ink/70">
+            You are currently signed in as <span className="font-semibold text-ink italic">{user.role.toLowerCase()}</span>. 
+            Access your dashboard or manage your account below.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href={user.role === "ADMIN" ? "/admin" : "/orders"}
-              className="inline-flex items-center justify-center rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-soft"
+
+          <div className="mt-10 flex flex-wrap gap-4">
+            <button
+              onClick={() => router.push(user.role === "ADMIN" ? "/admin" : "/orders")}
+              className="flex-1 min-w-[200px] inline-flex items-center justify-center rounded-full bg-brand-600 px-8 py-4 text-sm font-bold text-white shadow-lg shadow-brand-200 transition-transform hover:scale-[1.02] active:scale-[0.98]"
             >
-              {user.role === "ADMIN" ? "Open admin dashboard" : "View my orders"}
-            </Link>
+              {user.role === "ADMIN" ? "Go to Admin Console" : "View My Orders"}
+            </button>
             <button
               type="button"
               onClick={logout}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-200 bg-white px-5 py-3 text-sm font-semibold text-ink"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-brand-200 bg-white px-8 py-4 text-sm font-bold text-ink transition-colors hover:bg-brand-50"
             >
               <LogOut className="h-4 w-4" />
-              Logout
+              Sign Out
             </button>
           </div>
         </div>
@@ -100,79 +81,73 @@ export function LoginPanel() {
     );
   }
 
+  // --- Unauthenticated State (The Form) ---
   return (
-    <div className="mt-6">
-      <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
-        <div className="rounded-[2rem] bg-white p-8 shadow-soft">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-700">Login</p>
-          <h1 className="mt-2 font-display text-4xl text-ink">Access your account or the admin console.</h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-ink/68">
-            This demo storefront includes two working local accounts so you can test the customer journey and store
-            management experience end to end.
-          </p>
-
-          <form onSubmit={submit} className="mt-8 max-w-xl space-y-4">
-            <label className="block space-y-2">
-              <span className="text-sm font-medium text-ink">Email</span>
-              <input
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                className="w-full rounded-[1.2rem] border border-brand-100 bg-cream px-4 py-3 text-sm text-ink outline-none"
-                required
-              />
-            </label>
-            <label className="block space-y-2">
-              <span className="text-sm font-medium text-ink">Password</span>
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-[1.2rem] border border-brand-100 bg-cream px-4 py-3 text-sm text-ink outline-none"
-                required
-              />
-            </label>
-            {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="inline-flex items-center justify-center rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-soft"
-            >
-              {submitting ? "Signing in..." : "Sign in"}
-            </button>
-          </form>
+    <div className="mt-10 max-w-[500px] mx-auto">
+      <div className="rounded-[2.5rem] bg-white p-10 shadow-soft border border-brand-50">
+        <div className="text-center mb-10">
+          <h1 className="font-display text-4xl text-ink">Sign In</h1>
+          <p className="mt-3 text-ink/60 text-sm">Please enter your credentials to access your account.</p>
         </div>
 
-        <div className="space-y-4">
-          {demoAccounts.map((account, index) => (
-            <button
-              key={account.email}
-              type="button"
-              onClick={() => loginAs(account.email, account.password)}
-              className="block w-full rounded-[2rem] bg-white p-6 text-left shadow-soft transition-transform duration-200 hover:-translate-y-1"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-100 text-brand-700">
-                {index === 0 ? <ShoppingBag className="h-5 w-5" /> : <ShieldCheck className="h-5 w-5" />}
-              </div>
-              <h2 className="mt-5 text-xl font-semibold text-ink">{account.label}</h2>
-              <p className="mt-2 text-sm leading-6 text-ink/68">{account.description}</p>
-              <div className="mt-4 rounded-[1.4rem] bg-cream p-4 text-sm text-ink/76">
-                <p>{account.email}</p>
-                <p className="mt-1">{account.password}</p>
-              </div>
-            </button>
-          ))}
+        <form onSubmit={submit} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[0.75rem] font-bold uppercase tracking-wider text-ink/50 ml-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              placeholder="name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-2xl border border-brand-100 bg-brand-50/30 px-5 py-4 text-sm text-ink transition-all focus:border-brand-400 focus:bg-white outline-none"
+              required
+            />
+          </div>
 
-          <article className="rounded-[2rem] bg-brand-900 p-6 text-white shadow-soft">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white">
-              <LockKeyhole className="h-5 w-5" />
+          <div className="space-y-2">
+            <div className="flex justify-between items-center px-2">
+              <label className="text-[0.75rem] font-bold uppercase tracking-wider text-ink/50">
+                Password
+              </label>
+              <button type="button" className="text-[0.7rem] font-bold text-brand-600 hover:underline">
+                Forgot?
+              </button>
             </div>
-            <h2 className="mt-5 text-xl font-semibold">Demo-ready login flow</h2>
-            <p className="mt-2 text-sm leading-6 text-white/74">
-              The login experience is wired to the shared store so customer and admin views switch instantly across the
-              app without page-level placeholders.
-            </p>
-          </article>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-2xl border border-brand-100 bg-brand-50/30 px-5 py-4 text-sm text-ink transition-all focus:border-brand-400 focus:bg-white outline-none"
+              required
+            />
+          </div>
+
+          {error && (
+            <div className="rounded-xl bg-rose-50 px-4 py-3 border border-rose-100">
+              <p className="text-xs font-semibold text-rose-600">{error}</p>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full inline-flex items-center justify-center rounded-full bg-brand-900 px-6 py-4 text-sm font-bold text-white shadow-soft transition-all hover:bg-brand-800 disabled:opacity-70"
+          >
+            {submitting ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              "Sign In to Account"
+            )}
+          </button>
+        </form>
+
+        <div className="mt-8 text-center">
+          <p className="text-sm text-ink/50">
+            Don&apos;t have an account?{" "}
+            <button className="font-bold text-brand-600 hover:underline">Create one</button>
+          </p>
         </div>
       </div>
     </div>

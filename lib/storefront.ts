@@ -1,6 +1,6 @@
 import type { ProductBadge, ShopCategoryId, ShopProduct } from "@/data/shop-catalog";
 
-export const WHATSAPP_ORDER_NUMBER = "923001234567";
+export const WHATSAPP_ORDER_NUMBER = "923363629981";
 
 export const badgeStyles: Record<ProductBadge, string> = {
   Fresh: "bg-white/95 text-brand-800",
