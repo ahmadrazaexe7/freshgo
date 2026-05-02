@@ -263,43 +263,35 @@ function HeroSection() {
 // ═════════════════════════════════════════════════════════════════════════════
 function CategoryShowcase() {
   const categoryImages: Record<string, string> = {
-    vegetables: shopProducts.find((p) => p.category === "vegetables")?.image || "",
-    fruits: shopProducts.find((p) => p.category === "fruits")?.image || "",
-    groceries: shopProducts.find((p) => p.category === "groceries")?.image || "",
+    vegetables: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200",
+    fruits: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=1200",
+    groceries: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=1200",
   };
 
   return (
     <section className="py-16 lg:py-24" style={{ background: T.forest }}>
       <div className="mx-auto max-w-[1280px] px-6 lg:px-12">
-        <Reveal className="mb-14 flex flex-col items-start gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="flex flex-col gap-5">
-            <SectionLabel>Our Collection</SectionLabel>
-            <h2
-              className="leading-[1.05] tracking-tight"
-              style={{
-                fontFamily: T.fonts.serif,
-                fontWeight: 300,
-                fontSize: "clamp(2rem, 5vw, 3.5rem)",
-                color: T.cream,
-              }}
-            >
-              Shop by <span style={{ color: T.gold, fontStyle: "italic" }}>Category</span>
-            </h2>
-          </div>
+        
+        <Reveal className="mb-14">
+          <SectionLabel>Our Collection</SectionLabel>
+          <h2 className="mt-4 leading-[1.05] tracking-tight" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(2rem, 5vw, 3.5rem)", color: T.cream }}>
+            Shop by <span style={{ color: T.gold, fontStyle: "italic" }}>Category</span>
+          </h2>
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {shopCategories.map((cat, idx) => {
             const img = categoryImages[cat.id];
+            // Making cards taller for the "Basket" look
             const isBig = idx === 0;
 
             return (
-              <Reveal key={cat.id} delay={idx * 0.12} className={isBig ? "sm:col-span-2 lg:col-span-1" : ""}>
+              <Reveal key={cat.id} delay={idx * 0.12} className={isBig ? "lg:col-span-1" : ""}>
                 <Link href={`/shop?category=${cat.id}`}>
                   <div
-                    className="group relative overflow-hidden rounded-xl transition-all duration-500"
+                    className="group relative overflow-hidden rounded-2xl transition-all duration-700"
                     style={{
-                      height: isBig ? 280 : 220,
+                      height: isBig ? 450 : 380, // Taller cards for premium feel
                       background: T.forestMid,
                     }}
                   >
@@ -308,16 +300,28 @@ function CategoryShowcase() {
                         src={img}
                         alt={cat.title}
                         fill
+                        priority={idx === 0}
                         className="object-cover transition-transform duration-1000 group-hover:scale-110"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F12] via-[#0B1F12]/40 to-transparent" />
 
-                    <div className="absolute bottom-0 left-0 right-0 p-4.5">
-                      <p className="mb-1 text-[0.55rem] font-bold uppercase tracking-[0.2em]" style={{ color: T.sage, fontFamily: T.fonts.sans }}>{cat.id}</p>
-                      <h3 className="mb-1 text-xl font-light" style={{ fontFamily: T.fonts.serif, color: T.cream }}>{cat.title}</h3>
-                      <p className="mb-3 max-w-xs text-sm font-light leading-relaxed" style={{ color: T.creamDim, fontFamily: T.fonts.sans }}>{cat.blurb}</p>
-                      <div className="inline-flex items-center gap-3 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-white" style={{ fontFamily: T.fonts.sans }}>
+                    {/* Darker gradient for better text legibility on busy bucket images */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+
+                    <div className="absolute bottom-0 left-0 right-0 p-8">
+                      <p className="mb-2 text-[0.6rem] font-bold uppercase tracking-[0.25em]" style={{ color: T.sage, fontFamily: T.fonts.sans }}>
+                        {cat.id}
+                      </p>
+
+                      <h3 className="mb-2 text-3xl font-light" style={{ fontFamily: T.fonts.serif, color: T.cream }}>
+                        {cat.title}
+                      </h3>
+
+                      <p className="mb-6 max-w-xs text-sm font-light leading-relaxed text-white/60" style={{ fontFamily: T.fonts.sans }}>
+                        {cat.blurb}
+                      </p>
+
+                      <div className="inline-flex items-center gap-3 text-[0.7rem] font-bold uppercase tracking-[0.2em] text-white">
                         Explore <ArrowRight size={14} className="transition-transform group-hover:translate-x-2" />
                       </div>
                     </div>
@@ -482,55 +486,49 @@ function StatsBar() {
   );
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// FEATURED PRODUCTS (Trending Now - Enhanced Professional Version)
+// ═════════════════════════
+// FEATURED PRODUCTS
 // ═════════════════════════════════════════════════════════════════════════════
 function FeaturedProducts({ products }: { products: ShopProduct[] }) {
   const { addToCart, toggleWishlist, wishlist } = useStore();
-  const prioritized = [...products].sort((a, b) => b.popularity - a.popularity).slice(0, 6);
+  const prioritized = [...products].sort((a, b) => b.popularity - a.popularity).slice(0, 8);
 
   return (
-    <section className="py-12 lg:py-16" style={{ background: T.forestMid }}>
+    <section className="py-16 lg:py-24" style={{ background: T.forestMid }}>
       <div className="mx-auto max-w-[1280px] px-6 lg:px-12">
-        <Reveal className="mb-10">
+        <Reveal className="mb-14">
           <SectionLabel>Best Sellers</SectionLabel>
-          <h2 className="mt-4 leading-[1.05]" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.5rem, 4vw, 2.5rem)", color: T.cream }}>
+          <h2 className="mt-5 leading-[1.05]" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(2rem, 5vw, 3.5rem)", color: T.cream }}>
             Trending <span style={{ color: T.gold, fontStyle: "italic" }}>Now</span>
           </h2>
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {prioritized.map((product, idx) => {
             const wishlisted = wishlist.includes(product.id);
             return (
-              <Reveal key={product.id} delay={idx * 0.08}>
-                <div className="group relative flex flex-col overflow-hidden rounded-xl" style={{ background: T.forestLight }}>
-                  <div className="relative aspect-square overflow-hidden">
+              <Reveal key={product.id} delay={idx * 0.06}>
+                <div className="group relative flex flex-col overflow-hidden rounded-lg" style={{ background: T.forestLight }}>
+                  <div className="relative aspect-[2/3] overflow-hidden">
                     <Image src={product.image} alt={product.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F12]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <button
                       onClick={() => toggleWishlist(product.id)}
-                      className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 backdrop-blur-md transition-all hover:scale-110"
+                      className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 backdrop-blur-md transition-all hover:scale-110"
                       style={{ background: wishlisted ? T.rose : 'rgba(255,255,255,0.1)' }}
                     >
-                      <Heart size={12} fill={wishlisted ? "white" : "none"} stroke="white" />
+                      <Heart size={10} fill={wishlisted ? "white" : "none"} stroke="white" />
                     </button>
-                    {product.badges.includes("Fresh") && (
-                      <span className="absolute left-3 top-3 rounded-full bg-sage/90 px-3 py-1 text-[0.55rem] font-bold uppercase tracking-wider text-white" style={{ fontFamily: T.fonts.sans }}>
-                        Fresh
-                      </span>
-                    )}
                   </div>
 
-                  <div className="flex flex-col gap-2 p-4">
+                  <div className="flex flex-col gap-2 p-3">
                     <div>
-                      <p className="mb-1 text-[0.55rem] font-bold uppercase tracking-widest text-sage" style={{ fontFamily: T.fonts.sans }}>{product.unit}</p>
-                      <h3 className="text-lg font-light text-white" style={{ fontFamily: T.fonts.serif }}>{product.name}</h3>
+                      <p className="mb-1 text-[0.5rem] font-bold uppercase tracking-widest text-sage" style={{ fontFamily: T.fonts.sans }}>{product.unit}</p>
+                      <h3 className="text-base font-light text-white" style={{ fontFamily: T.fonts.serif }}>{product.name}</h3>
                     </div>
-                    <div className="flex items-center justify-between border-t border-white/5 pt-3">
-                      <span className="text-lg font-medium text-goldLight" style={{ fontFamily: T.fonts.sans }}>{formatPrice(product.price)}</span>
-                      <button onClick={() => addToCart(product.id, 1)} className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black transition-transform hover:scale-110 hover:bg-gold">
-                        <Plus size={14} />
+                    <div className="flex items-center justify-between border-t border-white/5 pt-2">
+                      <span className="text-base font-medium text-goldLight" style={{ fontFamily: T.fonts.sans }}>{formatPrice(product.price)}</span>
+                      <button onClick={() => addToCart(product.id, 1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-black transition-transform hover:scale-110">
+                        <Plus size={12} />
                       </button>
                     </div>
                   </div>
@@ -539,12 +537,6 @@ function FeaturedProducts({ products }: { products: ShopProduct[] }) {
             );
           })}
         </div>
-
-        <Reveal className="mt-10 text-center">
-          <Link href="/shop" className="inline-flex items-center gap-3 rounded-full border border-gold/30 px-8 py-3 text-xs font-bold uppercase tracking-[0.15em] text-gold transition-all hover:bg-gold hover:text-forest">
-            View All Products <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-          </Link>
-        </Reveal>
       </div>
     </section>
   );

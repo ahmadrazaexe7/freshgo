@@ -128,7 +128,7 @@ function Reveal({
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref as React.RefObject<Element>, { once: true, margin: "-80px" });
   return (
     <motion.div
       ref={ref}
