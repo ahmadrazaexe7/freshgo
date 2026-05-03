@@ -146,7 +146,7 @@ export function LoginPanel() {
         <div className="mt-8 text-center">
           <p className="text-sm text-ink/50">
             Don&apos;t have an account?{" "}
-            <button className="font-bold text-brand-600 hover:underline">Create one</button>
+            <button onClick={() => router.push('/signup')} className="font-bold text-brand-600 hover:underline">Create one</button>
           </p>
         </div>
       </div>

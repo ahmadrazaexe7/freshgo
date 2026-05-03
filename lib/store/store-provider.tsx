@@ -92,6 +92,7 @@ type StoreContextValue = {
   toggleWishlist: (productId: string) => void;
   placeOrder: (input: CheckoutInput) => StoreOrder | null;
   login: (email: string, password: string) => { ok: boolean; error?: string };
+  register: (email: string, password: string, name: string, role?: UserRole) => { ok: boolean; error?: string };
   logout: () => void;
   reorderOrder: (orderId: string) => void;
   upsertProduct: (input: ProductInput) => void;
@@ -106,6 +107,7 @@ type PersistedState = {
   orders: StoreOrder[];
   user: SessionUser | null;
   lastAction?: string | null;
+  accounts?: Array<{ email: string; password: string; name: string; role: UserRole }>;
 };
 
 const demoUsers = [
@@ -217,6 +219,8 @@ const baseState: PersistedState = {
   wishlist: [],
   orders: buildDemoOrders(),
   user: null
+  ,
+  accounts: demoUsers
 };
 
 const StoreContext = createContext<StoreContextValue | null>(null);
@@ -233,7 +237,8 @@ function safeParseState(value: string | null): PersistedState | null {
       !Array.isArray(parsed.products) ||
       !Array.isArray(parsed.cart) ||
       !Array.isArray(parsed.wishlist) ||
-      !Array.isArray(parsed.orders)
+      !Array.isArray(parsed.orders) ||
+      !Array.isArray(parsed.accounts)
     ) {
       return null;
     }
@@ -354,14 +359,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }
 
   function login(email: string, password: string) {
-    const matchedUser = demoUsers.find(
-      (user) => user.email.toLowerCase() === email.toLowerCase() && user.password === password
+    const matchedUser = stateRef.current.accounts?.find(
+      (user) => String(user.email).toLowerCase() === String(email).toLowerCase() && user.password === password
     );
 
     if (!matchedUser) {
       return {
         ok: false,
-        error: "Use one of the demo accounts shown below to access the store."
+        error: "Invalid credentials. Use a demo account or sign up."
       };
     }
 
@@ -373,6 +378,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         name: matchedUser.name,
         role: matchedUser.role
       }
+    }));
+
+    return { ok: true };
+  }
+
+  function register(email: string, password: string, name: string, role: UserRole = "CUSTOMER") {
+    // basic validation
+    if (!email || !password || !name) return { ok: false, error: "Missing required fields" };
+
+    const exists = stateRef.current.accounts?.some((a) => String(a.email).toLowerCase() === String(email).toLowerCase());
+
+    if (exists) return { ok: false, error: "An account with this email already exists" };
+
+    const newAccount = { email, password, name, role };
+
+    setState((current) => ({
+      ...current,
+      lastAction: `Created account for ${name}`,
+      accounts: current.accounts ? [newAccount, ...current.accounts] : [newAccount]
     }));
 
     return { ok: true };
@@ -607,6 +631,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       toggleWishlist,
       placeOrder,
       login,
+      register,
       logout,
       reorderOrder,
       upsertProduct,
