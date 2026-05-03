@@ -44,7 +44,7 @@ export function CartPageClient() {
 
   return (
     <section className="mx-auto max-w-7xl px-3 sm:px-4 lg:px-6 lg:px-8 py-6 sm:py-10">
-      <div className="grid gap-4 sm:gap-6 lg:gap-6 lg:grid-cols-[1fr_280px] lg:grid-cols-[1fr_360px]">
+      <div className="grid gap-4 sm:gap-6 lg:gap-6 lg:grid-cols-[1fr_360px]">
         <div className="rounded-lg sm:rounded-2xl lg:rounded-[2rem] bg-white p-3 sm:p-4 lg:p-6 shadow-soft">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div>
@@ -136,52 +136,6 @@ export function CartPageClient() {
           <Link
             href="/shop"
             className="mt-2 sm:mt-3 inline-flex w-full items-center justify-center rounded-full border border-white/15 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white/90 hover:bg-white/5 transition-colors"
-          >
-            Continue shopping
-          </Link>
-        </aside>
-      </div>
-    </section>
-  );
-}
-                    </button>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-
-        <aside className="rounded-[2rem] bg-gradient-to-b from-brand-900 to-emerald-700 p-6 text-white shadow-xl">
-          <p className="text-sm uppercase tracking-[0.18em] text-brand-200">Order summary</p>
-          <div className="mt-6 space-y-4 text-sm text-white/78">
-            <div className="flex items-center justify-between">
-              <span>Subtotal</span>
-              <span>{formatPrice(subtotal)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Delivery fee</span>
-              <span>{deliveryFee === 0 ? "Free" : formatPrice(deliveryFee)}</span>
-            </div>
-            <div className="flex items-center justify-between border-t border-white/10 pt-4 text-base font-semibold text-white">
-              <span>Total</span>
-              <span>{formatPrice(total)}</span>
-            </div>
-          </div>
-
-          <div className="mt-6 rounded-[1.5rem] bg-white/8 p-4 text-sm text-white/74">
-            Orders above {formatPrice(3000)} unlock free delivery. COD is available on all orders.
-          </div>
-
-          <Link
-            href="/checkout"
-            className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-white px-4 py-3 text-sm font-semibold text-ink shadow-md hover:shadow-xl"
-          >
-            Proceed to checkout
-          </Link>
-          <Link
-            href="/shop"
-            className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-white/15 px-4 py-3 text-sm font-semibold text-white/90"
           >
             Continue shopping
           </Link>
