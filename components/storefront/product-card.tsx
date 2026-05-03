@@ -47,10 +47,10 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       viewport={{ once: true, amount: 0.2 }}
       whileHover={{ y: -6, transition: { duration: 0.3 } }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="group relative overflow-hidden rounded-[2rem] border border-brand-100/50 bg-white shadow-sm transition-all duration-300 hover:shadow-2xl hover:shadow-brand-100/50"
+      className="group relative overflow-hidden rounded-lg border border-brand-100/40 bg-white shadow-sm transition-all duration-200 hover:shadow-lg"
     >
       {/* Product Image Section */}
-      <div className="relative aspect-[1/1] overflow-hidden bg-gradient-to-br from-brand-50 to-brand-100/30">
+      <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-brand-50 to-brand-100/30">
         <Image
           src={product.image}
           alt={product.name}
@@ -66,7 +66,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             <span
               key={badge}
               className={cn(
-                "rounded-full px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.15em] shadow-sm",
+                "rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] shadow-sm",
                 badgeStyles[badge]
               )}
             >
@@ -74,7 +74,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             </span>
           ))}
           {discountPercent && (
-            <span className="rounded-full bg-amber-400 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.15em] text-ink shadow-sm">
+            <span className="rounded-full bg-amber-400 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-ink shadow-sm">
               -{discountPercent}%
             </span>
           )}
@@ -94,7 +94,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           )}
           aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
         >
-          <Heart className={cn("h-3.5 w-3.5 transition-all", isWishlisted && "fill-white")} />
+          <Heart className={cn("h-4 w-4 transition-all", isWishlisted && "fill-white")} />
         </MotionButton>
 
         {/* Quick Add to Cart Overlay */}
@@ -108,21 +108,21 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={cn(
-              "w-full rounded-full py-2 text-xs font-bold uppercase tracking-[0.1em] shadow-lg transition-all",
+              "w-full rounded-full py-2 text-sm font-bold uppercase tracking-[0.1em] shadow-lg transition-all",
               isInCart
                 ? "bg-brand-700 text-white"
                 : "bg-white text-ink shadow-brand-100/50 hover:bg-brand-600 hover:text-white"
             )}
           >
             {isInCart ? (
-              <span className="inline-flex items-center justify-center gap-1">
-                <ShoppingCart className="h-3 w-3" />
-                <span className="text-xs">In Cart</span>
+              <span className="inline-flex items-center justify-center gap-2">
+                <ShoppingCart className="h-4 w-4" />
+                In Cart ({cartItem?.quantity})
               </span>
             ) : (
-              <span className="inline-flex items-center justify-center gap-1">
-                <ShoppingCart className="h-3 w-3" />
-                <span className="text-xs">Add</span>
+              <span className="inline-flex items-center justify-center gap-2">
+                <ShoppingCart className="h-4 w-4" />
+                Add to Cart
               </span>
             )}
           </MotionButton>
@@ -130,26 +130,26 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       </div>
 
       {/* Product Info Section */}
-      <div className="space-y-2 p-2.5">
+      <div className="space-y-3 p-3">
         {/* Category & Unit */}
-        <div className="flex items-start justify-between gap-1.5">
+        <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-[8px] font-black uppercase tracking-[0.2em] text-brand-600">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-600">
               {category?.title ?? "Fresh Pick"}
             </p>
-            <Link href={`/products/${product.slug}`} className="block mt-0.5">
-              <h3 className="line-clamp-1 text-xs font-bold text-ink transition-colors group-hover:text-brand-700">
+            <Link href={`/products/${product.slug}`} className="block mt-1">
+              <h3 className="line-clamp-2 text-sm font-semibold text-ink transition-colors group-hover:text-brand-700">
                 {product.name}
               </h3>
             </Link>
           </div>
-          <span className="shrink-0 rounded-full bg-brand-50 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.15em] text-brand-700">
+          <span className="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-700">
             {product.unit}
           </span>
         </div>
 
         {/* Short Description */}
-        <p className="line-clamp-2 text-xs leading-relaxed text-ink/60">
+        <p className="line-clamp-2 text-sm leading-tight text-ink/60">
           {product.shortDescription}
         </p>
 
@@ -171,7 +171,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         <div className="flex items-end justify-between pt-2">
           <div>
             <div className="flex items-baseline gap-2">
-              <p className="text-xl font-black text-ink">{formatPrice(product.price)}</p>
+              <p className="text-lg font-black text-ink">{formatPrice(product.price)}</p>
               {product.compareAtPrice && (
                 <p className="text-sm text-ink/40 line-through">
                   {formatPrice(product.compareAtPrice)}
@@ -182,7 +182,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           </div>
 
           {/* Popularity Score */}
-          <div className="flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-1.5">
+          <div className="flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-1">
             <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
             <span className="text-xs font-bold text-ink">{product.popularity}</span>
           </div>
@@ -191,7 +191,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         {/* View Product Link */}
         <Link
           href={`/products/${product.slug}`}
-          className="group/link mt-3 flex items-center justify-between rounded-full bg-cream px-4 py-2.5 text-xs font-bold uppercase tracking-[0.1em] text-ink transition-all hover:bg-brand-600 hover:text-white"
+          className="group/link mt-3 flex items-center justify-between rounded-full bg-cream px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] text-ink transition-all hover:bg-brand-600 hover:text-white"
         >
           <span>View Details</span>
           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-1" />

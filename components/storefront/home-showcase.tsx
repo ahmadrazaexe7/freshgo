@@ -495,43 +495,72 @@ function FeaturedProducts({ products }: { products: ShopProduct[] }) {
   const prioritized = [...products].sort((a, b) => b.popularity - a.popularity).slice(0, 8);
 
   return (
-    <section className="py-12 sm:py-16 lg:py-24" style={{ background: T.forestMid }}>
-      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
-        <Reveal className="mb-8 sm:mb-12 lg:mb-14">
-          <SectionLabel>Best Sellers</SectionLabel>
-          <h2 className="mt-3 sm:mt-4 leading-[1.05]" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.5rem, 4.5vw, 3.5rem)", color: T.cream }}>
-            Trending <span style={{ color: T.gold, fontStyle: "italic" }}>Now</span>
+    <section className="py-12 sm:py-20" style={{ background: T.forestMid }}>
+      <div className="mx-auto max-w-[1100px] px-4">
+        <Reveal className="flex flex-col items-center text-center mb-10">
+          <SectionLabel>Curated Selection</SectionLabel>
+          <h2 className="mt-2 text-3xl sm:text-5xl text-white tracking-tighter" style={{ fontFamily: T.fonts.serif, fontWeight: 300 }}>
+            The <span style={{ color: T.gold, fontStyle: "italic" }}>Edit</span>
           </h2>
         </Reveal>
 
-        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2 lg:grid-cols-4 lg:gap-3">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
           {prioritized.map((product, idx) => {
-            const wishlisted = wishlist.includes(product.id);
+            const isWishlisted = wishlist.includes(product.id);
             return (
-              <Reveal key={product.id} delay={idx * 0.06}>
-                <div className="group relative flex flex-col overflow-hidden rounded-md" style={{ background: T.forestLight }}>
-                  <div className="relative aspect-[3/3.5] overflow-hidden">
-                    <Image src={product.image} alt={product.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+              <Reveal key={product.id} delay={idx * 0.05}>
+                <div className="group relative flex flex-col">
+                  
+                  {/* IMAGE: Minimalist frame with a very subtle inner glow */}
+                  <div className="relative aspect-[1/1.2] overflow-hidden rounded-2xl bg-white/[0.03] ring-1 ring-white/10 transition-all duration-500 group-hover:ring-white/20 group-hover:shadow-[0_0_30px_rgba(0,0,0,0.4)]">
+                    <Image 
+                      src={product.image} 
+                      alt={product.name} 
+                      fill 
+                      className="object-cover transition-transform duration-1000 ease-out group-hover:scale-110" 
+                    />
+                    
+                    {/* Floating Wishlist - Ultra Glassmorphism */}
                     <button
                       onClick={() => toggleWishlist(product.id)}
-                      className="absolute right-1.5 sm:right-2 top-1.5 sm:top-2 flex h-5 sm:h-6 w-5 sm:w-6 items-center justify-center rounded-full border border-white/10 backdrop-blur-md transition-all hover:scale-110"
-                      style={{ background: wishlisted ? T.rose : 'rgba(255,255,255,0.1)' }}
+                      className="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-white/10 backdrop-blur-md transition-transform active:scale-90"
+                      style={{ background: isWishlisted ? T.rose : 'rgba(255,255,255,0.05)' }}
                     >
-                      <Heart size={6} className="sm:size-2.5" fill={wishlisted ? "white" : "none"} stroke="white" />
+                      <Heart size={12} fill={isWishlisted ? "white" : "none"} stroke="white" strokeWidth={2} />
                     </button>
-                  </div>
 
-                  <div className="flex flex-col gap-0.5 sm:gap-1 p-1.5 sm:p-2">
-                    <div>
-                      <p className="mb-0.5 text-[0.4rem] sm:text-[0.45rem] font-bold uppercase tracking-widest text-sage" style={{ fontFamily: T.fonts.sans }}>{product.unit}</p>
-                      <h3 className="text-[0.7rem] sm:text-sm font-light text-white line-clamp-1" style={{ fontFamily: T.fonts.serif }}>{product.name}</h3>
-                    </div>
-                    <div className="flex items-center justify-between border-t border-white/5 pt-0.5 sm:pt-1">
-                      <span className="text-[0.65rem] sm:text-sm font-medium text-goldLight" style={{ fontFamily: T.fonts.sans }}>{formatPrice(product.price)}</span>
-                      <button onClick={() => addToCart(product.id, 1)} className="flex h-5 sm:h-6 w-5 sm:w-6 items-center justify-center rounded-full bg-white text-black transition-transform hover:scale-110">
-                        <Plus size={8} className="sm:size-2.5" />
+                    {/* Desktop "Quick Add" - Appears as a soft blur overlay */}
+                    <div className="absolute inset-x-0 bottom-0 translate-y-full p-2 transition-transform duration-300 group-hover:translate-y-0 hidden lg:block">
+                      <button 
+                        onClick={() => addToCart(product.id, 1)}
+                        className="w-full rounded-xl bg-white py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-black shadow-2xl transition-colors hover:bg-gold hover:text-white"
+                      >
+                        Add to Bag
                       </button>
                     </div>
+                  </div>
+
+                  {/* INFO: No background, very tight spacing */}
+                  <div className="mt-3 px-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-gold opacity-80 mb-0.5">{product.unit}</p>
+                        <h3 className="truncate text-sm font-light text-cream/90" style={{ fontFamily: T.fonts.serif }}>
+                          {product.name}
+                        </h3>
+                      </div>
+                      <span className="text-sm font-medium text-white">
+                        {formatPrice(product.price)}
+                      </span>
+                    </div>
+
+                    {/* Mobile Only: Simple thin line button to keep vertical height low */}
+                    <button 
+                      onClick={() => addToCart(product.id, 1)}
+                      className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-white/10 py-1.5 text-[10px] font-medium text-white transition-all active:bg-white active:text-black lg:hidden"
+                    >
+                      <Plus size={10} /> Add
+                    </button>
                   </div>
                 </div>
               </Reveal>
