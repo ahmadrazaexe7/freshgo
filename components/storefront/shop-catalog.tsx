@@ -505,10 +505,10 @@ export function ShopCatalog({ initialQuery = "", initialCategory }: ShopCatalogP
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1280px] px-6 lg:px-12 py-8">
-        {/* Category Navigation Tabs */}
-        <div className="sticky top-[180px] z-20 -mx-6 px-6 mb-8 lg:top-[190px]">
-          <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
+      <div className="mx-auto max-w-[1280px] px-3 sm:px-4 lg:px-6 lg:px-12 py-6 sm:py-8">
+        {/* Category Navigation Tabs - Mobile Friendly */}
+        <div className="sticky top-[100px] sm:top-[120px] lg:top-[140px] z-20 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 mb-6 sm:mb-8">
+          <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-3 sm:pb-4 scrollbar-hide scroll-smooth">
             {shopCategories.map((category) => {
               const Icon = categoryIcons[category.id];
               const isActive = activeCategory === category.id;
@@ -517,18 +517,16 @@ export function ShopCatalog({ initialQuery = "", initialCategory }: ShopCatalogP
                   key={category.id}
                   onClick={() => scrollToCategory(category.id)}
                   className={cn(
-                    "flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold uppercase tracking-[0.1em] whitespace-nowrap transition-all",
-                    isActive
-                      ? "bg-gold text-forest shadow-lg"
-                      : "border border-white/10 text-cream/60 hover:border-gold/50 hover:text-gold"
+                    "flex items-center gap-1.5 sm:gap-2 rounded-full px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-[0.1em] whitespace-nowrap transition-all"
                   )}
                   style={{ 
                     background: isActive ? T.gold : T.forestLight,
+                    color: isActive ? T.forest : T.cream,
                     fontFamily: T.fonts.sans 
                   }}
                 >
-                  <Icon className="h-4 w-4" />
-                  {category.title}
+                  <Icon className="h-3.5 sm:h-4 w-3.5 sm:w-4 flex-shrink-0" />
+                  <span>{category.title}</span>
                 </button>
               );
             })}
@@ -537,22 +535,22 @@ export function ShopCatalog({ initialQuery = "", initialCategory }: ShopCatalogP
 
         {/* Main Content */}
         {resultsCount > 0 && (query || activeFilters.length > 0) ? (
-          <section className="mt-8">
+          <section className="mt-6 sm:mt-8">
             <Reveal>
-              <div className="flex items-end justify-between gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3 sm:gap-4">
                 <div>
                   <SectionLabel>Search Results</SectionLabel>
-                  <h2 className="mt-3 leading-[1.05]" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.5rem, 4vw, 2.5rem)", color: T.cream }}>
+                  <h2 className="mt-2 sm:mt-3 leading-[1.05]" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.3rem, 3.5vw, 2.5rem)", color: T.cream }}>
                     Best matches for you
                   </h2>
                 </div>
-                <p className="text-sm" style={{ color: T.creamDim }}>{resultsCount} products found</p>
+                <p className="text-xs sm:text-sm" style={{ color: T.creamDim }}>{resultsCount} products found</p>
               </div>
             </Reveal>
 
             <div className={cn(
-              "mt-6 gap-4",
-              viewMode === "grid" ? "grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "flex flex-col gap-4"
+              "mt-4 sm:mt-6 gap-2 sm:gap-4",
+              viewMode === "grid" ? "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "flex flex-col gap-3 sm:gap-4"
             )}>
               {featuredMatches.map((product, index) => (
                 <ShopProductCard key={product.id} product={product} priority={index === 0} />
@@ -562,19 +560,19 @@ export function ShopCatalog({ initialQuery = "", initialCategory }: ShopCatalogP
         ) : null}
 
         {resultsCount === 0 ? (
-          <section className="mt-8 rounded-2xl border border-white/10 px-6 py-16 text-center" style={{ background: T.forestMid }}>
+          <section className="mt-8 rounded-lg sm:rounded-2xl border border-white/10 px-4 sm:px-6 py-12 sm:py-16 text-center" style={{ background: T.forestMid }}>
             <Reveal>
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full" style={{ background: T.forestLight }}>
-                <Search className="h-10 w-10" style={{ color: T.sage }} />
+              <div className="mx-auto flex h-16 sm:h-20 w-16 sm:w-20 items-center justify-center rounded-full" style={{ background: T.forestLight }}>
+                <Search className="h-8 sm:h-10 w-8 sm:w-10" style={{ color: T.sage }} />
               </div>
-              <p className="mt-6 text-sm font-bold uppercase tracking-[0.2em]" style={{ color: T.gold, fontFamily: T.fonts.sans }}>No matches found</p>
-              <h2 className="mt-3 leading-tight" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.5rem, 4vw, 2.5rem)", color: T.cream }}>
+              <p className="mt-4 sm:mt-6 text-xs sm:text-sm font-bold uppercase tracking-[0.2em]" style={{ color: T.gold, fontFamily: T.fonts.sans }}>No matches found</p>
+              <h2 className="mt-2 sm:mt-3 leading-tight" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.3rem, 3.5vw, 2.5rem)", color: T.cream }}>
                 Nothing matches this search yet.
               </h2>
-              <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed" style={{ color: T.creamDim, fontFamily: T.fonts.sans }}>
+              <p className="mx-auto mt-2 sm:mt-3 max-w-2xl text-xs sm:text-base leading-relaxed" style={{ color: T.creamDim, fontFamily: T.fonts.sans }}>
                 Try a simpler product name or remove some filters to see more products.
               </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <div className="mt-6 sm:mt-8 flex flex-wrap justify-center gap-2">
                 {quickSearches.map((term) => (
                   <button
                     key={term}
@@ -583,7 +581,7 @@ export function ShopCatalog({ initialQuery = "", initialCategory }: ShopCatalogP
                       setSearch(term);
                       setActiveFilters([]);
                     }}
-                    className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold transition-all hover:border-gold/50 hover:text-gold"
+                    className="rounded-full border border-white/10 px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-semibold transition-all hover:border-gold/50 hover:text-gold"
                     style={{ background: T.forestLight, color: T.cream, fontFamily: T.fonts.sans }}
                   >
                     {term}
@@ -593,33 +591,33 @@ export function ShopCatalog({ initialQuery = "", initialCategory }: ShopCatalogP
             </Reveal>
           </section>
         ) : (
-          <div className="mt-8 space-y-16">
+          <div className="mt-8 space-y-12 sm:space-y-16">
             {visibleSections.map((section) => {
               const Icon = categoryIcons[section.id];
 
               return (
                 <section key={section.id} id={section.id} className="scroll-mt-48">
                   <Reveal>
-                    <div className="flex flex-col gap-6 pb-8" style={{ borderBottom: `1px solid ${T.forestLight}` }}>
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl" style={{ background: T.forestLight, border: `1px solid ${T.gold}/20` }}>
-                          <Icon className="h-6 w-6" style={{ color: T.gold }} />
+                    <div className="flex flex-col gap-4 sm:gap-6 pb-6 sm:pb-8" style={{ borderBottom: `1px solid ${T.forestLight}` }}>
+                      <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+                        <div className="flex h-10 sm:h-14 w-10 sm:w-14 items-center justify-center rounded-lg sm:rounded-2xl flex-shrink-0" style={{ background: T.forestLight, border: `1px solid ${T.gold}/20` }}>
+                          <Icon className="h-5 sm:h-6 w-5 sm:w-6" style={{ color: T.gold }} />
                         </div>
-                        <div>
-                          <p className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: T.gold, fontFamily: T.fonts.sans }}>{section.title}</p>
-                          <h2 className="leading-[1.05]" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.5rem, 4vw, 2.5rem)", color: T.cream }}>{section.subtitle}</h2>
+                        <div className="min-w-0">
+                          <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.2em]" style={{ color: T.gold, fontFamily: T.fonts.sans }}>{section.title}</p>
+                          <h2 className="leading-[1.05] mt-0.5 sm:mt-1" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.3rem, 3.5vw, 2.5rem)", color: T.cream }}>{section.subtitle}</h2>
                         </div>
                       </div>
-                      <p className="max-w-2xl text-base leading-relaxed" style={{ color: T.creamDim, fontFamily: T.fonts.sans }}>{section.blurb}</p>
-                      <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 px-4 py-2 text-sm font-semibold w-fit" style={{ color: T.gold, fontFamily: T.fonts.sans }}>
+                      <p className="max-w-2xl text-xs sm:text-base leading-relaxed" style={{ color: T.creamDim, fontFamily: T.fonts.sans }}>{section.blurb}</p>
+                      <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold w-fit" style={{ color: T.gold, fontFamily: T.fonts.sans }}>
                         {section.products.length} curated picks
                       </div>
                     </div>
                   </Reveal>
 
                   <div className={cn(
-                    "mt-8 gap-4",
-                    viewMode === "grid" ? "grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "flex flex-col gap-4"
+                    "mt-4 sm:mt-8 gap-2 sm:gap-4",
+                    viewMode === "grid" ? "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "flex flex-col gap-2 sm:gap-4"
                   )}>
                     {section.products.map((product, index) => (
                       <ShopProductCard key={product.id} product={product} priority={section.id === activeCategory && index === 0} />

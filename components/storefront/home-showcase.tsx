@@ -129,12 +129,12 @@ function ShimmerOverlay() {
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <span
-      className="inline-flex items-center gap-2 text-[0.65rem] font-bold uppercase tracking-[0.3em]"
+      className="inline-flex items-center gap-1 sm:gap-2 text-[0.6rem] sm:text-[0.65rem] font-bold uppercase tracking-[0.3em]"
       style={{ color: T.gold, fontFamily: T.fonts.sans }}
     >
-      <span className="inline-block h-px w-8" style={{ background: T.gold }} />
+      <span className="inline-block h-px w-6 sm:w-8" style={{ background: T.gold }} />
       {children}
-      <span className="inline-block h-px w-8" style={{ background: T.gold }} />
+      <span className="inline-block h-px w-6 sm:w-8" style={{ background: T.gold }} />
     </span>
   );
 }
@@ -200,7 +200,7 @@ function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.85 }}
-            className="mb-8 max-w-sm text-base font-light leading-relaxed"
+            className="mb-6 sm:mb-8 max-w-sm text-xs sm:text-base font-light leading-relaxed"
             style={{ color: T.creamDim, fontFamily: T.fonts.sans }}
           >
             Premium produce sourced from local farms, delivered to your door the
@@ -211,15 +211,15 @@ function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.0 }}
-            className="flex flex-wrap items-center gap-4"
+            className="flex flex-wrap items-center gap-3 sm:gap-4"
           >
             <Link
               href="/shop"
-              className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full px-8 py-4 text-xs font-bold uppercase tracking-[0.15em] transition-all duration-300"
+              className="group relative inline-flex items-center gap-2 sm:gap-3 overflow-hidden rounded-full px-6 sm:px-8 py-3 sm:py-4 text-xs font-bold uppercase tracking-[0.15em] transition-all duration-300"
               style={{ background: T.gold, color: T.forest, fontFamily: T.fonts.sans }}
             >
               <span className="relative z-10">Shop Now</span>
-              <ArrowRight size={16} className="relative z-10 transition-transform group-hover:translate-x-1" />
+              <ArrowRight size={14} className="relative z-10 transition-transform group-hover:translate-x-1 sm:size-4" />
               <span className="absolute inset-0 translate-y-full rounded-full transition-transform duration-300 group-hover:translate-y-0" style={{ background: T.goldLight }} />
             </Link>
           </motion.div>
@@ -247,8 +247,9 @@ function HeroSection() {
         </motion.div>
       </div>
 
+      {/* Scroll indicator - Hidden on mobile */}
       <motion.div
-        className="absolute bottom-8 left-1/2 z-20 -translate-x-1/2 flex flex-col items-center gap-2"
+        className="hidden absolute bottom-8 left-1/2 z-20 -translate-x-1/2 flex flex-col items-center gap-2 sm:flex"
         style={{ opacity: opacityFade as any }}
       >
         <span className="text-[0.6rem] uppercase tracking-[0.3em] font-bold" style={{ color: T.creamDim, fontFamily: T.fonts.sans }}>Scroll</span>
@@ -269,17 +270,17 @@ function CategoryShowcase() {
   };
 
   return (
-    <section className="py-16 lg:py-24" style={{ background: T.forest }}>
-      <div className="mx-auto max-w-[1280px] px-6 lg:px-12">
+    <section className="py-12 sm:py-16 lg:py-24" style={{ background: T.forest }}>
+      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
         
-        <Reveal className="mb-14">
+        <Reveal className="mb-10 sm:mb-14">
           <SectionLabel>Our Collection</SectionLabel>
-          <h2 className="mt-4 leading-[1.05] tracking-tight" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(2rem, 5vw, 3.5rem)", color: T.cream }}>
+          <h2 className="mt-3 sm:mt-4 leading-[1.05] tracking-tight" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.5rem, 4.5vw, 3.5rem)", color: T.cream }}>
             Shop by <span style={{ color: T.gold, fontStyle: "italic" }}>Category</span>
           </h2>
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
           {shopCategories.map((cat, idx) => {
             const img = categoryImages[cat.id];
             // Making cards taller for the "Basket" look
@@ -291,7 +292,7 @@ function CategoryShowcase() {
                   <div
                     className="group relative overflow-hidden rounded-2xl transition-all duration-700"
                     style={{
-                      height: isBig ? 450 : 380, // Taller cards for premium feel
+                      height: isBig ? "clamp(280px, 60vw, 450px)" : "clamp(240px, 50vw, 380px)", // Responsive heights
                       background: T.forestMid,
                     }}
                   >
@@ -308,21 +309,21 @@ function CategoryShowcase() {
                     {/* Darker gradient for better text legibility on busy bucket images */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
 
-                    <div className="absolute bottom-0 left-0 right-0 p-8">
-                      <p className="mb-2 text-[0.6rem] font-bold uppercase tracking-[0.25em]" style={{ color: T.sage, fontFamily: T.fonts.sans }}>
+                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-8">
+                      <p className="mb-1 sm:mb-2 text-[0.55rem] sm:text-[0.6rem] font-bold uppercase tracking-[0.25em]" style={{ color: T.sage, fontFamily: T.fonts.sans }}>
                         {cat.id}
                       </p>
 
-                      <h3 className="mb-2 text-3xl font-light" style={{ fontFamily: T.fonts.serif, color: T.cream }}>
+                      <h3 className="mb-1 sm:mb-2 text-xl sm:text-2xl lg:text-3xl font-light" style={{ fontFamily: T.fonts.serif, color: T.cream }}>
                         {cat.title}
                       </h3>
 
-                      <p className="mb-6 max-w-xs text-sm font-light leading-relaxed text-white/60" style={{ fontFamily: T.fonts.sans }}>
+                      <p className="mb-3 sm:mb-6 max-w-xs text-xs sm:text-sm font-light leading-relaxed text-white/60 line-clamp-2 sm:line-clamp-3" style={{ fontFamily: T.fonts.sans }}>
                         {cat.blurb}
                       </p>
 
-                      <div className="inline-flex items-center gap-3 text-[0.7rem] font-bold uppercase tracking-[0.2em] text-white">
-                        Explore <ArrowRight size={14} className="transition-transform group-hover:translate-x-2" />
+                      <div className="inline-flex items-center gap-2 sm:gap-3 text-[0.65rem] sm:text-[0.7rem] font-bold uppercase tracking-[0.2em] text-white">
+                        Explore <ArrowRight size={12} className="transition-transform group-hover:translate-x-2 sm:size-[14px]" />
                       </div>
                     </div>
                   </div>
@@ -352,16 +353,16 @@ function StreakRewards() {
   ];
 
   return (
-    <section className="py-16 lg:py-24" style={{ background: T.forestMid }}>
-      <div className="mx-auto max-w-[1280px] px-6 lg:px-12">
-        <Reveal className="mb-12">
+    <section className="py-12 sm:py-16 lg:py-24" style={{ background: T.forestMid }}>
+      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
+        <Reveal className="mb-8 sm:mb-12">
           <SectionLabel>Loyalty Program</SectionLabel>
           <h2
-            className="mt-5 leading-tight"
+            className="mt-3 sm:mt-4 leading-tight"
             style={{
               fontFamily: T.fonts.serif,
               fontWeight: 300,
-              fontSize: "clamp(2rem, 4vw, 3rem)",
+              fontSize: "clamp(1.5rem, 4vw, 3rem)",
               color: T.cream,
             }}
           >
@@ -369,41 +370,41 @@ function StreakRewards() {
           </h2>
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-12 lg:gap-12">
           {/* Left: Counter Card */}
           <Reveal className="lg:col-span-5" delay={0.1}>
           <div 
-            className="relative h-full overflow-hidden rounded-2xl border border-white/5 p-8 lg:p-10"
+            className="relative h-full overflow-hidden rounded-xl sm:rounded-2xl border border-white/5 p-4 sm:p-6 lg:p-8 lg:p-10"
             style={{ background: T.forestLight }}
           >
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500">
-                <Flame size={24} fill="currentColor" />
+            <div className="mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+              <div className="flex h-10 sm:h-12 w-10 sm:w-12 items-center justify-center rounded-lg sm:rounded-xl bg-orange-500/10 text-orange-500">
+                <Flame size={20} fill="currentColor" className="sm:size-6" />
               </div>
               <div>
-                <h3 className="text-3xl font-light text-white" style={{ fontFamily: T.fonts.serif }}>1 day</h3>
+                <h3 className="text-2xl sm:text-3xl font-light text-white" style={{ fontFamily: T.fonts.serif }}>1 day</h3>
                   <p className="text-xs font-bold uppercase tracking-widest text-orange-500/70" style={{ fontFamily: T.fonts.sans }}>Current Streak</p>
                 </div>
               </div>
               
-              <p className="text-lg font-light leading-relaxed text-white/60" style={{ fontFamily: T.fonts.sans }}>
+              <p className="text-sm sm:text-base lg:text-lg font-light leading-relaxed text-white/60" style={{ fontFamily: T.fonts.sans }}>
                 Streaks update automatically when you place orders—no manual clicks required.
               </p>
 
               {/* Day Track */}
-              <div className="mt-12 flex justify-between gap-2">
+              <div className="mt-8 sm:mt-12 flex justify-between gap-1 sm:gap-2">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                  <div key={num} className="flex flex-col items-center gap-3">
+                  <div key={num} className="flex flex-col items-center gap-2 sm:gap-3">
                     <div 
                       className={cn(
-                        "h-1.5 w-full rounded-full transition-colors duration-500",
+                        "h-1 sm:h-1.5 w-full rounded-full transition-colors duration-500",
                         num === 1 ? "bg-orange-500" : "bg-white/10"
                       )}
-                      style={{ width: 'clamp(20px, 3vw, 40px)' }}
+                      style={{ width: 'clamp(16px, 2.5vw, 40px)' }}
                     />
                     <span 
                       className={cn(
-                        "text-[0.6rem] font-bold",
+                        "text-[0.5rem] sm:text-[0.6rem] font-bold",
                         num === 1 ? "text-orange-500" : "text-white/20"
                       )}
                     >
@@ -417,26 +418,26 @@ function StreakRewards() {
 
           {/* Right: Rewards Table */}
           <Reveal className="lg:col-span-7" delay={0.2}>
-            <div className="rounded-2xl border border-white/5 bg-black/20 p-8 lg:p-10">
-              <h4 className="mb-8 text-sm font-bold uppercase tracking-[0.3em] text-[#C9A84C]" style={{ fontFamily: T.fonts.sans }}>
+            <div className="rounded-xl sm:rounded-2xl border border-white/5 bg-black/20 p-4 sm:p-6 lg:p-8 lg:p-10">
+              <h4 className="mb-6 sm:mb-8 text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-[#C9A84C]" style={{ fontFamily: T.fonts.sans }}>
                 Reward Milestone Table
               </h4>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:gap-x-6 sm:gap-y-8 lg:grid-cols-4">
                 {rewards.map((r, i) => (
-                  <div key={i} className="flex flex-col gap-2">
+                  <div key={i} className="flex flex-col gap-1 sm:gap-2">
                     <span className="text-xs font-bold uppercase tracking-widest text-white/30" style={{ fontFamily: T.fonts.sans }}>Day {r.day}</span>
-                    <span className="text-xl font-light text-white" style={{ fontFamily: T.fonts.serif }}>{r.perk}</span>
+                    <span className="text-base sm:text-lg lg:text-xl font-light text-white" style={{ fontFamily: T.fonts.serif }}>{r.perk}</span>
                   </div>
                 ))}
               </div>
 
-              <Divider className="my-10 opacity-10" />
+              <Divider className="my-6 sm:my-10 opacity-10" />
 
-              <div className="flex items-start gap-5">
-                <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sage/10 text-sage">
-                  <Truck size={18} />
+              <div className="flex items-start gap-3 sm:gap-5">
+                <div className="mt-1 flex h-8 sm:h-10 w-8 sm:w-10 shrink-0 items-center justify-center rounded-full bg-sage/10 text-sage">
+                  <Truck size={16} className="sm:size-[18px]" />
                 </div>
-                <p className="text-base font-light italic leading-relaxed text-white/70" style={{ fontFamily: T.fonts.serif }}>
+                <p className="text-sm sm:text-base font-light italic leading-relaxed text-white/70" style={{ fontFamily: T.fonts.serif }}>
                   Free delivery on orders above <span className="text-white font-semibold not-italic">Rs 1,000</span> after day 10 of your streak.
                 </p>
               </div>
@@ -463,20 +464,20 @@ function StatsBar() {
   ];
 
   return (
-    <section style={{ background: T.forest }} ref={ref} className="py-16">
+    <section className="py-12 sm:py-16 lg:py-20" style={{ background: T.forest }}>
       <Divider className="opacity-30" />
-      <div className="mx-auto max-w-[1280px] px-6 lg:px-12 mt-12 mb-12">
-        <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
+      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12 mt-8 sm:mt-12 mb-8 sm:mb-12">
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 lg:gap-8">
           {stats.map((s, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, delay: i * 0.1 }}
-              className="flex flex-col items-center gap-2 text-center"
+              className="flex flex-col items-center gap-1 sm:gap-2 text-center"
             >
-              <span className="text-4xl font-light lg:text-5xl" style={{ fontFamily: T.fonts.serif, color: T.gold }}>{s.value}</span>
-              <span className="text-[0.7rem] font-bold uppercase tracking-[0.25em]" style={{ color: T.creamDim, fontFamily: T.fonts.sans }}>{s.label}</span>
+              <span className="text-2xl sm:text-3xl lg:text-4xl lg:text-5xl font-light" style={{ fontFamily: T.fonts.serif, color: T.gold }}>{s.value}</span>
+              <span className="text-[0.6rem] sm:text-[0.7rem] font-bold uppercase tracking-[0.25em]" style={{ color: T.creamDim, fontFamily: T.fonts.sans }}>{s.label}</span>
             </motion.div>
           ))}
         </div>
@@ -494,41 +495,41 @@ function FeaturedProducts({ products }: { products: ShopProduct[] }) {
   const prioritized = [...products].sort((a, b) => b.popularity - a.popularity).slice(0, 8);
 
   return (
-    <section className="py-16 lg:py-24" style={{ background: T.forestMid }}>
-      <div className="mx-auto max-w-[1280px] px-6 lg:px-12">
-        <Reveal className="mb-14">
+    <section className="py-12 sm:py-16 lg:py-24" style={{ background: T.forestMid }}>
+      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
+        <Reveal className="mb-8 sm:mb-12 lg:mb-14">
           <SectionLabel>Best Sellers</SectionLabel>
-          <h2 className="mt-5 leading-[1.05]" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(2rem, 5vw, 3.5rem)", color: T.cream }}>
+          <h2 className="mt-3 sm:mt-4 leading-[1.05]" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.5rem, 4.5vw, 3.5rem)", color: T.cream }}>
             Trending <span style={{ color: T.gold, fontStyle: "italic" }}>Now</span>
           </h2>
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2 lg:grid-cols-4 lg:gap-3">
           {prioritized.map((product, idx) => {
             const wishlisted = wishlist.includes(product.id);
             return (
               <Reveal key={product.id} delay={idx * 0.06}>
-                <div className="group relative flex flex-col overflow-hidden rounded-lg" style={{ background: T.forestLight }}>
-                  <div className="relative aspect-[2/3] overflow-hidden">
+                <div className="group relative flex flex-col overflow-hidden rounded-md" style={{ background: T.forestLight }}>
+                  <div className="relative aspect-[3/3.5] overflow-hidden">
                     <Image src={product.image} alt={product.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
                     <button
                       onClick={() => toggleWishlist(product.id)}
-                      className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 backdrop-blur-md transition-all hover:scale-110"
+                      className="absolute right-1.5 sm:right-2 top-1.5 sm:top-2 flex h-5 sm:h-6 w-5 sm:w-6 items-center justify-center rounded-full border border-white/10 backdrop-blur-md transition-all hover:scale-110"
                       style={{ background: wishlisted ? T.rose : 'rgba(255,255,255,0.1)' }}
                     >
-                      <Heart size={10} fill={wishlisted ? "white" : "none"} stroke="white" />
+                      <Heart size={6} className="sm:size-2.5" fill={wishlisted ? "white" : "none"} stroke="white" />
                     </button>
                   </div>
 
-                  <div className="flex flex-col gap-2 p-3">
+                  <div className="flex flex-col gap-0.5 sm:gap-1 p-1.5 sm:p-2">
                     <div>
-                      <p className="mb-1 text-[0.5rem] font-bold uppercase tracking-widest text-sage" style={{ fontFamily: T.fonts.sans }}>{product.unit}</p>
-                      <h3 className="text-base font-light text-white" style={{ fontFamily: T.fonts.serif }}>{product.name}</h3>
+                      <p className="mb-0.5 text-[0.4rem] sm:text-[0.45rem] font-bold uppercase tracking-widest text-sage" style={{ fontFamily: T.fonts.sans }}>{product.unit}</p>
+                      <h3 className="text-[0.7rem] sm:text-sm font-light text-white line-clamp-1" style={{ fontFamily: T.fonts.serif }}>{product.name}</h3>
                     </div>
-                    <div className="flex items-center justify-between border-t border-white/5 pt-2">
-                      <span className="text-base font-medium text-goldLight" style={{ fontFamily: T.fonts.sans }}>{formatPrice(product.price)}</span>
-                      <button onClick={() => addToCart(product.id, 1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-black transition-transform hover:scale-110">
-                        <Plus size={12} />
+                    <div className="flex items-center justify-between border-t border-white/5 pt-0.5 sm:pt-1">
+                      <span className="text-[0.65rem] sm:text-sm font-medium text-goldLight" style={{ fontFamily: T.fonts.sans }}>{formatPrice(product.price)}</span>
+                      <button onClick={() => addToCart(product.id, 1)} className="flex h-5 sm:h-6 w-5 sm:w-6 items-center justify-center rounded-full bg-white text-black transition-transform hover:scale-110">
+                        <Plus size={8} className="sm:size-2.5" />
                       </button>
                     </div>
                   </div>
@@ -553,31 +554,31 @@ function PromoBanner() {
   ];
 
   return (
-    <section className="py-16 lg:py-20" style={{ background: T.forest }}>
-      <div className="mx-auto max-w-[1280px] px-6 lg:px-12">
+    <section className="py-12 sm:py-16 lg:py-20" style={{ background: T.forest }}>
+      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
         <Reveal>
-          <div className="relative overflow-hidden rounded-3xl bg-[#122A18] p-8 lg:p-16">
-            <div className="relative z-10 grid grid-cols-1 gap-10 lg:grid-cols-2">
-              <div className="flex flex-col justify-center gap-6">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-[#122A18] p-5 sm:p-8 lg:p-16">
+            <div className="relative z-10 grid grid-cols-1 gap-5 sm:gap-8 lg:grid-cols-2 lg:gap-10">
+              <div className="flex flex-col justify-center gap-3 sm:gap-4 lg:gap-6">
                 <SectionLabel>Bulk Offers</SectionLabel>
-                <h2 style={{ fontFamily: T.fonts.serif, fontSize: "clamp(1.8rem, 4vw, 3rem)", color: T.cream, lineHeight: 1.2 }}>
+                <h2 style={{ fontFamily: T.fonts.serif, fontSize: "clamp(1.3rem, 3.5vw, 3rem)", color: T.cream, lineHeight: 1.2 }}>
                   Save Big on <span style={{ color: T.gold, fontStyle: "italic" }}>Family Packs.</span>
                 </h2>
-                <p className="max-w-md text-base font-light text-white/60" style={{ fontFamily: T.fonts.sans }}>
+                <p className="max-w-md text-xs sm:text-sm lg:text-base font-light text-white/60" style={{ fontFamily: T.fonts.sans }}>
                   Stock up on essentials and enjoy tiered discounts automatically applied at checkout.
                 </p>
-                <Link href="/shop" className="group inline-flex items-center gap-4 rounded-full bg-[#C9A84C] px-10 py-5 text-xs font-bold uppercase tracking-widest text-black transition-all hover:bg-[#E2C87A]">
-                  Claim Deals <ArrowRight size={16} className="transition-transform group-hover:translate-x-2" />
+                <Link href="/shop" className="group inline-flex items-center gap-2 sm:gap-3 rounded-full bg-[#C9A84C] px-5 sm:px-8 lg:px-10 py-2.5 sm:py-3 lg:py-4 text-xs font-bold uppercase tracking-widest text-black transition-all hover:bg-[#E2C87A] w-fit">
+                  Claim Deals <ArrowRight size={12} className="sm:size-4 transition-transform group-hover:translate-x-2" />
                 </Link>
               </div>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2 sm:gap-3">
                 {deals.map((deal, i) => (
-                  <div key={i} className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 p-5 backdrop-blur-sm">
+                  <div key={i} className="flex items-center justify-between rounded-lg sm:rounded-xl border border-white/5 bg-white/5 p-3 sm:p-4 lg:p-5 backdrop-blur-sm">
                     <div>
-                      <p className="text-xl font-light text-white" style={{ fontFamily: T.fonts.serif }}>{deal.label}</p>
+                      <p className="text-sm sm:text-base lg:text-lg font-light text-white" style={{ fontFamily: T.fonts.serif }}>{deal.label}</p>
                       <p className="text-xs font-bold uppercase tracking-widest text-white/40" style={{ fontFamily: T.fonts.sans }}>{deal.qty}</p>
                     </div>
-                    <span className="rounded-full border border-[#C9A84C]/40 bg-[#C9A84C]/10 px-4 py-2 text-[0.7rem] font-bold uppercase text-[#C9A84C]" style={{ fontFamily: T.fonts.sans }}>{deal.savings}</span>
+                    <span className="rounded-full border border-[#C9A84C]/40 bg-[#C9A84C]/10 px-2.5 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 text-[0.6rem] sm:text-[0.7rem] font-bold uppercase text-[#C9A84C]" style={{ fontFamily: T.fonts.sans }}>{deal.savings}</span>
                   </div>
                 ))}
               </div>
@@ -599,19 +600,19 @@ function TestimonialStrip() {
   ];
 
   return (
-    <section className="overflow-hidden py-20" style={{ background: T.forest }}>
-      <Reveal className="mb-12 text-center">
+    <section className="overflow-hidden py-12 sm:py-16 lg:py-20" style={{ background: T.forest }}>
+      <Reveal className="mb-8 sm:mb-12 text-center px-4">
         <SectionLabel>Customer Stories</SectionLabel>
       </Reveal>
       <div className="relative">
-        <motion.div animate={{ x: ["0%", "-50%"] }} transition={{ duration: 30, repeat: Infinity, ease: "linear" }} className="flex w-max gap-6">
+        <motion.div animate={{ x: ["0%", "-50%"] }} transition={{ duration: 30, repeat: Infinity, ease: "linear" }} className="flex w-max gap-4 sm:gap-6 px-6">
           {[...items, ...items].map((t, i) => (
-            <div key={i} className="w-[380px] rounded-2xl border border-white/5 bg-[#122A18] p-8">
-              <div className="mb-4 flex gap-1">
-                {[...Array(5)].map((_, s) => <Star key={s} size={12} fill={T.gold} stroke="none" />)}
+            <div key={i} className="w-[280px] sm:w-[340px] lg:w-[380px] rounded-xl sm:rounded-2xl border border-white/5 bg-[#122A18] p-4 sm:p-6 lg:p-8 flex-shrink-0">
+              <div className="mb-3 sm:mb-4 flex gap-1">
+                {[...Array(5)].map((_, s) => <Star key={s} size={10} className="sm:size-3" fill={T.gold} stroke="none" />)}
               </div>
-              <p className="mb-6 text-lg font-light italic leading-relaxed text-white" style={{ fontFamily: T.fonts.serif }}>"{t.text}"</p>
-              <p className="text-[0.7rem] font-bold uppercase tracking-widest text-sage" style={{ fontFamily: T.fonts.sans }}>— {t.name}</p>
+              <p className="mb-4 sm:mb-6 text-sm sm:text-base lg:text-lg font-light italic leading-relaxed text-white" style={{ fontFamily: T.fonts.serif }}>"{t.text}"</p>
+              <p className="text-[0.65rem] sm:text-[0.7rem] font-bold uppercase tracking-widest text-sage" style={{ fontFamily: T.fonts.sans }}>— {t.name}</p>
             </div>
           ))}
         </motion.div>
@@ -629,17 +630,17 @@ function FeaturesSection() {
   ];
 
   return (
-    <section className="py-16 lg:py-20" style={{ background: T.forestMid }}>
+    <section className="py-12 sm:py-16 lg:py-20" style={{ background: T.forestMid }}>
       <div className="mx-auto max-w-[1280px] px-6 lg:px-12">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {features.map((f, i) => (
             <Reveal key={i} delay={i * 0.1}>
-              <div className="flex flex-col gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10 border border-gold/20 text-gold">
-                  <f.icon size={24} />
+              <div className="flex flex-col gap-3 sm:gap-4">
+                <div className="flex h-10 sm:h-12 w-10 sm:w-12 items-center justify-center rounded-lg sm:rounded-xl bg-gold/10 border border-gold/20 text-gold">
+                  <f.icon size={20} className="sm:size-6" />
                 </div>
-                <h3 className="text-xl font-light text-white" style={{ fontFamily: T.fonts.serif }}>{f.title}</h3>
-                <p className="text-sm font-light leading-relaxed text-white/50" style={{ fontFamily: T.fonts.sans }}>{f.desc}</p>
+                <h3 className="text-lg sm:text-xl font-light text-white" style={{ fontFamily: T.fonts.serif }}>{f.title}</h3>
+                <p className="text-xs sm:text-sm font-light leading-relaxed text-white/50" style={{ fontFamily: T.fonts.sans }}>{f.desc}</p>
               </div>
             </Reveal>
           ))}
@@ -651,14 +652,14 @@ function FeaturesSection() {
 
 function FooterCTA() {
   return (
-    <section className="py-24 lg:py-32 text-center" style={{ background: T.forest }}>
-      <Reveal className="flex flex-col items-center gap-6">
+    <section className="py-16 sm:py-24 lg:py-32 text-center px-4 sm:px-6" style={{ background: T.forest }}>
+      <Reveal className="flex flex-col items-center gap-4 sm:gap-6">
         <SectionLabel>Start Now</SectionLabel>
-        <h2 style={{ fontFamily: T.fonts.serif, fontSize: "clamp(2rem, 5vw, 4rem)", color: T.cream, lineHeight: 1.2 }}>
+        <h2 style={{ fontFamily: T.fonts.serif, fontSize: "clamp(1.5rem, 4vw, 4rem)", color: T.cream, lineHeight: 1.2 }}>
           The kitchen of your <br/> <span style={{ color: T.gold, fontStyle: "italic" }}>dreams</span> starts here.
         </h2>
-        <Link href="/shop" className="group mt-5 inline-flex items-center gap-4 rounded-full bg-[#C9A84C] px-10 py-4 text-sm font-bold uppercase tracking-widest text-black transition-all hover:scale-105">
-          Start Shopping <ArrowRight size={18} />
+        <Link href="/shop" className="group mt-3 sm:mt-5 inline-flex items-center gap-2 sm:gap-4 rounded-full bg-[#C9A84C] px-6 sm:px-10 py-3 sm:py-4 text-xs sm:text-sm font-bold uppercase tracking-widest text-black transition-all hover:scale-105">
+          Start Shopping <ArrowRight size={16} className="sm:size-[18px]" />
         </Link>
       </Reveal>
     </section>

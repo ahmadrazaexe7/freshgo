@@ -39,15 +39,15 @@ export function CheckoutPageClient() {
 
   if (items.length === 0 && !submittedOrderId) {
     return (
-      <section className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:px-8">
-        <div className="rounded-[2rem] bg-white p-10 shadow-soft">
-          <h1 className="font-display text-4xl text-ink">Your checkout is waiting for a cart.</h1>
-          <p className="mt-3 text-base leading-7 text-ink/66">
+      <section className="mx-auto max-w-4xl px-3 sm:px-4 lg:px-6 lg:px-8 py-8 sm:py-16 text-center">
+        <div className="rounded-lg sm:rounded-2xl lg:rounded-[2rem] bg-white p-6 sm:p-8 lg:p-10 shadow-soft">
+          <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl text-ink">Your checkout is waiting for a cart.</h1>
+          <p className="mt-2 sm:mt-3 text-xs sm:text-base leading-relaxed text-ink/66">
             Add a few products first, then return here to complete your cash-on-delivery order.
           </p>
           <Link
             href="/shop"
-            className="mt-8 inline-flex rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-soft"
+            className="mt-6 sm:mt-8 inline-flex rounded-full bg-brand-600 px-4 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-soft hover:shadow-lg transition-shadow"
           >
             Go to shop
           </Link>
