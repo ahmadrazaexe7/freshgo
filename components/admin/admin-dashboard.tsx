@@ -48,6 +48,8 @@ export function AdminDashboard() {
   const { isAdmin, products, orders, upsertProduct, deleteProduct, updateOrderStatus } = useStore();
   const [streakEvents, setStreakEvents] = useState<Array<any>>([]);
   const [form, setForm] = useState<EditableProduct>(initialForm);
+  const [editingName, setEditingName] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const metrics = useMemo(
     () => [
@@ -137,10 +139,12 @@ export function AdminDashboard() {
     });
 
     setForm(initialForm);
+    setEditingName(null);
   }
 
   function loadProduct(product: ShopProduct) {
-    setForm({
+    try {
+      setForm({
       id: product.id,
       category: product.category,
       name: product.name,
@@ -156,7 +160,26 @@ export function AdminDashboard() {
       popularity: String(product.popularity),
       bestSellerScore: String(product.bestSellerScore),
       badges: product.badges
-    });
+      });
+
+      setEditingName(product.name);
+      setEditingId(product.id);
+      // developer console hint
+      // eslint-disable-next-line no-console
+      console.log("Admin: loadProduct called for", product.id, product.name);
+
+      // scroll form into view for clarity
+      try {
+        const el = document.getElementById("admin-product-form");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      } catch (e) {
+        // ignore
+      }
+    } catch (err) {
+      // defensive: log to console for debugging in case setForm throws
+      // eslint-disable-next-line no-console
+      console.error("Failed to load product for editing", err);
+    }
   }
 
   function toggleBadge(badge: ShopProduct["badges"][number]) {
@@ -188,12 +211,21 @@ export function AdminDashboard() {
         ))}
       </div>
 
+        {editingName ? (
+          <div className="fixed right-6 bottom-24 z-50 rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-lg">
+            Editing: {editingName}
+          </div>
+        ) : null}
+
       <div className="mt-8 grid gap-6 xl:grid-cols-[420px_1fr]">
-        <form onSubmit={submitProduct} className="rounded-[2rem] bg-white p-6 shadow-soft">
+        <form id="admin-product-form" onSubmit={submitProduct} className="rounded-[2rem] bg-white p-6 shadow-soft">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-700">Product CRUD</p>
               <h2 className="mt-2 text-2xl font-semibold text-ink">{form.id ? "Edit product" : "Add product"}</h2>
+              {editingName ? (
+                <p className="mt-1 text-sm text-ink/60">Editing: <span className="font-semibold">{editingName}</span></p>
+              ) : null}
             </div>
             {form.id ? (
               <button
@@ -343,7 +375,14 @@ export function AdminDashboard() {
             </div>
             <div className="mt-6 space-y-3">
               {products.map((product) => (
-                <div key={product.id} className="flex flex-col gap-3 rounded-[1.5rem] bg-cream p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div
+                  key={product.id}
+                  data-product-id={product.id}
+                  className={cn(
+                    "flex flex-col gap-3 rounded-[1.5rem] bg-cream p-4 sm:flex-row sm:items-center sm:justify-between",
+                    editingId === product.id ? "ring-2 ring-brand-600" : ""
+                  )}
+                >
                   <div>
                     <p className="text-sm font-semibold text-ink">{product.name}</p>
                     <p className="mt-1 text-sm text-ink/62">
