@@ -378,7 +378,7 @@ export function ShopCatalog({ initialQuery = "", initialCategory }: ShopCatalogP
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search products…"
                 className="w-full rounded-full border border-white/10 py-2.5 pl-9 pr-4 text-[0.8rem] focus:outline-none focus:ring-2 transition-all"
-                style={{ background: T.forestLight, color: T.cream, fontFamily: T.fonts.sans, focusRingColor: T.gold }}
+                style={{ background: T.forestLight, color: T.cream, fontFamily: T.fonts.sans }}
               />
               {search && (
                 <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: T.creamDim }}>
