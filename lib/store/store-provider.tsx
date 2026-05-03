@@ -238,6 +238,11 @@ function safeParseState(value: string | null): PersistedState | null {
       return null;
     }
 
+    // If products array is empty, treat as invalid state so we use default shopProducts
+    if (parsed.products.length === 0) {
+      return null;
+    }
+
     return parsed;
   } catch {
     return null;
@@ -252,7 +257,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined") return;
 
     const parsed = safeParseState(window.localStorage.getItem(storageKey));
-    if (parsed) setState(parsed);
+    if (parsed) {
+      setState(parsed);
+    } else {
+      // Clear potentially corrupted localStorage data
+      window.localStorage.removeItem(storageKey);
+    }
   }, []);
   const stateRef = useRef(state);
 
