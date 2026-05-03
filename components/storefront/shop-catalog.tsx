@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import {
   Apple,
-  ArrowRight,
   ArrowUpDown,
   ChevronDown,
   Filter,
@@ -40,7 +39,7 @@ const categoryIcons = {
   groceries: ShoppingBasket
 };
 
-// ─── Design tokens (matching home theme) ─────────────────────────────────────
+// ─── Design tokens ─────────────────────────────────────────────────────────────
 const T = {
   forest: "#0B1F12",
   forestMid: "#122A18",
@@ -57,85 +56,69 @@ const T = {
   }
 };
 
+// ─── Sticky heights (tune to match your actual navbar height) ─────────────────
+// Navbar = 73px → header bar = 73px
+// Search/filter sticky bar = ~68px  → top: 73px
+// Category tabs sticky       = ~56px  → top: 73+68 = 141px
+// Product section scroll-mt  = 141+56+16 = 213px
+const NAVBAR_H    = 73;
+const SEARCHBAR_H = 68;
+const TABBAR_H    = 56;
+const SEARCH_TOP  = NAVBAR_H;                            // 73
+const TABS_TOP    = NAVBAR_H + SEARCHBAR_H;              // 141
+const SCROLL_MT   = NAVBAR_H + SEARCHBAR_H + TABBAR_H + 16; // 213
+
 const sortOptions: { value: SortOption; label: string }[] = [
-  { value: "popularity", label: "Most Popular" },
-  { value: "price-low", label: "Price: Low to High" },
-  { value: "price-high", label: "Price: High to Low" },
-  { value: "newest", label: "Newest First" },
-  { value: "best-selling", label: "Best Selling" },
+  { value: "popularity",   label: "Most Popular"        },
+  { value: "price-low",    label: "Price: Low to High"  },
+  { value: "price-high",   label: "Price: High to Low"  },
+  { value: "newest",       label: "Newest First"        },
+  { value: "best-selling", label: "Best Selling"        },
 ];
 
-const filterOptions: { value: FilterOption; label: string; icon: any }[] = [
-  { value: "fresh", label: "Fresh", icon: Leaf },
-  { value: "discount", label: "On Sale", icon: ShoppingBasket },
-  { value: "best-seller", label: "Best Seller", icon: Heart },
-  { value: "under-500", label: "Under Rs. 500", icon: Search },
+const filterOptions: { value: FilterOption; label: string }[] = [
+  { value: "fresh",      label: "Fresh"       },
+  { value: "discount",   label: "On Sale"     },
+  { value: "best-seller",label: "Best Seller" },
+  { value: "under-500",  label: "Under Rs 500"},
 ];
 
 function sortProducts(products: ShopProduct[], sortBy: SortOption) {
-  const sorted = [...products];
-
-  sorted.sort((left, right) => {
+  return [...products].sort((l, r) => {
     switch (sortBy) {
-      case "price-low":
-        return left.price - right.price;
-      case "price-high":
-        return right.price - left.price;
-      case "newest":
-        return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
-      case "best-selling":
-        return right.bestSellerScore - left.bestSellerScore;
-      case "popularity":
-      default:
-        return right.popularity - left.popularity;
+      case "price-low":    return l.price - r.price;
+      case "price-high":   return r.price - l.price;
+      case "newest":       return new Date(r.createdAt).getTime() - new Date(l.createdAt).getTime();
+      case "best-selling": return r.bestSellerScore - l.bestSellerScore;
+      default:             return r.popularity - l.popularity;
     }
   });
-
-  return sorted;
 }
 
-function matchesFilters(products: ShopProduct[], filters: FilterOption[]) {
+function matchesFilters(product: ShopProduct, filters: FilterOption[]) {
   if (filters.length === 0) return true;
-
-  return products.filter((product) => {
-    return filters.every((filter) => {
-      switch (filter) {
-        case "fresh":
-          return product.badges.includes("Fresh");
-        case "discount":
-          return product.badges.includes("Discount") || Boolean(product.compareAtPrice);
-        case "best-seller":
-          return product.badges.includes("Best Seller");
-        case "under-500":
-          return product.price <= 500;
-        default:
-          return true;
-      }
-    });
+  return filters.every((f) => {
+    switch (f) {
+      case "fresh":       return product.badges.includes("Fresh");
+      case "discount":    return product.badges.includes("Discount") || Boolean(product.compareAtPrice);
+      case "best-seller": return product.badges.includes("Best Seller");
+      case "under-500":   return product.price <= 500;
+      default:            return true;
+    }
   });
 }
 
-// ─── Reusable reveal wrapper ─────────────────────────────────────────────────
-function Reveal({
-  children,
-  delay = 0,
-  y = 36,
-  className = "",
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  y?: number;
-  className?: string;
-}) {
+// ─── Reveal ───────────────────────────────────────────────────────────────────
+function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref as React.RefObject<Element>, { once: true, margin: "-80px" });
+  const inView = useInView(ref as React.RefObject<Element>, { once: true, margin: "-60px" });
   return (
     <motion.div
       ref={ref}
       className={className}
-      initial={{ opacity: 0, y, scale: 0.95 }}
+      initial={{ opacity: 0, y: 28, scale: 0.97 }}
       animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-      transition={{ duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>
@@ -144,112 +127,132 @@ function Reveal({
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span
-      className="inline-flex items-center gap-2 text-[0.65rem] font-bold uppercase tracking-[0.3em]"
-      style={{ color: T.gold, fontFamily: T.fonts.sans }}
-    >
-      <span className="inline-block h-px w-8" style={{ background: T.gold }} />
+    <span className="inline-flex items-center gap-2 text-[0.6rem] font-black uppercase tracking-[0.32em]" style={{ color: T.gold, fontFamily: T.fonts.sans }}>
+      <span className="inline-block h-px w-6" style={{ background: T.gold }} />
       {children}
-      <span className="inline-block h-px w-8" style={{ background: T.gold }} />
+      <span className="inline-block h-px w-6" style={{ background: T.gold }} />
     </span>
   );
 }
 
-// ─── Product Card Component (inline for theme consistency) ───────────────────
+// ─── Compact Product Card (5-per-row) ─────────────────────────────────────────
 function ShopProductCard({ product, priority = false }: { product: ShopProduct; priority?: boolean }) {
   const { addToCart, toggleWishlist, wishlist, cart } = useStore();
   const isWishlisted = wishlist.includes(product.id);
-  const cartItem = cart.find((item) => item.productId === product.id);
-  const isInCart = Boolean(cartItem);
+  const cartItem    = cart.find((i) => i.productId === product.id);
+  const isInCart    = Boolean(cartItem);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart(product.id, 1);
-  };
-
-  const handleWishlist = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleWishlist(product.id);
-  };
+  const handleAddToCart = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); addToCart(product.id, 1); };
+  const handleWishlist  = (e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product.id); };
 
   return (
     <MotionDiv
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 14 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      whileHover={{ y: -4, transition: { duration: 0.3 } }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="group relative overflow-hidden rounded-xl"
-      style={{ background: T.forestLight }}
+      viewport={{ once: true, amount: 0.1 }}
+      whileHover={{ y: -6, transition: { duration: 0.22, ease: "easeOut" } }}
+      transition={{ duration: 0.32, ease: "easeOut" }}
+      className="group relative overflow-hidden rounded-2xl"
+      style={{
+        background: `linear-gradient(160deg, ${T.forestLight} 0%, ${T.forestMid} 100%)`,
+        border: "1px solid rgba(255,255,255,0.07)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+      }}
     >
-      <div className="relative aspect-square overflow-hidden">
+      {/* Gold shimmer on hover */}
+      <div
+        className="pointer-events-none absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{ background: "linear-gradient(135deg, rgba(201,168,76,0.1) 0%, transparent 55%)" }}
+      />
+
+      {/* ── Image area ── */}
+      <div className="relative overflow-hidden" style={{ aspectRatio: "3/2" }}>
         <Image
           src={product.image}
           alt={product.name}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
+          sizes="(max-width: 640px) 50vw, 20vw"
           priority={priority}
-          className="object-cover transition-transform duration-700 group-hover:scale-110"
+          className="object-cover"
+          style={{ transition: "transform 0.65s cubic-bezier(0.22,1,0.36,1)" }}
+          // Use CSS group-hover via a wrapper className trick isn't available here,
+          // so we rely on the whileHover lift + the shimmer for the effect.
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F12]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        {/* Depth gradient */}
+        <div
+          className="absolute inset-0"
+          style={{ background: `linear-gradient(to top, ${T.forest}CC 0%, transparent 50%)` }}
+        />
 
-        {/* Badges */}
-        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-          {product.badges.slice(0, 2).map((badge) => (
-            <span
-              key={badge}
-              className="rounded-full bg-sage/90 px-2.5 py-1 text-[0.55rem] font-bold uppercase tracking-wider text-white"
-              style={{ fontFamily: T.fonts.sans }}
-            >
-              {badge}
-            </span>
-          ))}
-        </div>
+        {/* Badge */}
+        {product.badges[0] && (
+          <span
+            className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[0.48rem] font-black uppercase tracking-wider"
+            style={{ background: "rgba(122,171,138,0.9)", color: "#fff", fontFamily: T.fonts.sans, backdropFilter: "blur(6px)" }}
+          >
+            {product.badges[0]}
+          </span>
+        )}
 
-        {/* Wishlist Button */}
+        {/* Wishlist */}
         <button
           onClick={handleWishlist}
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 backdrop-blur-md transition-all hover:scale-110"
-          style={{ background: isWishlisted ? T.rose : 'rgba(255,255,255,0.1)' }}
+          className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full transition-all duration-200 hover:scale-110"
+          style={{
+            background: isWishlisted ? T.rose : "rgba(255,255,255,0.15)",
+            border: "1px solid rgba(255,255,255,0.18)",
+            backdropFilter: "blur(8px)",
+          }}
         >
-          <Heart size={12} fill={isWishlisted ? "white" : "none"} stroke="white" />
+          <Heart size={9} fill={isWishlisted ? "white" : "none"} stroke="white" strokeWidth={2.5} />
         </button>
 
-        {/* Quick Add to Cart */}
-        <MotionDiv
-          initial={{ opacity: 0, y: 20 }}
-          whileHover={{ opacity: 1, y: 0 }}
-          className="absolute inset-x-0 bottom-0 p-3"
+        {/* Add-to-cart panel — slides up */}
+        <div
+          className="absolute inset-x-0 bottom-0 p-2 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"
+          style={{ zIndex: 20 }}
         >
           <button
             onClick={handleAddToCart}
-            className={cn(
-              "w-full rounded-full py-3 text-sm font-bold uppercase tracking-[0.1em] shadow-lg transition-all",
-              isInCart
-                ? "bg-gold text-forest"
-                : "bg-white text-black hover:bg-gold hover:text-forest"
-            )}
+            className="w-full flex items-center justify-center gap-1 rounded-full py-1.5 text-[0.6rem] font-black uppercase tracking-[0.14em] shadow-lg transition-colors duration-150"
+            style={{
+              background: isInCart
+                ? `linear-gradient(90deg, ${T.gold}, ${T.goldLight})`
+                : "rgba(255,255,255,0.93)",
+              color: isInCart ? T.forest : "#0B1F12",
+              fontFamily: T.fonts.sans,
+            }}
           >
-            {isInCart ? `In Cart (${cartItem?.quantity})` : "Add to Cart"}
+            {isInCart ? <><ShoppingBasket size={9} /> In Cart ({cartItem?.quantity})</> : <><Plus size={9} /> Add to Cart</>}
           </button>
-        </MotionDiv>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2 p-4">
-        <div>
-          <p className="mb-1 text-[0.55rem] font-bold uppercase tracking-widest text-sage" style={{ fontFamily: T.fonts.sans }}>{product.unit}</p>
-          <Link href={`/products/${product.slug}`}>
-            <h3 className="text-lg font-light text-white" style={{ fontFamily: T.fonts.serif }}>{product.name}</h3>
-          </Link>
-        </div>
-        <div className="flex items-center justify-between border-t border-white/5 pt-3">
-          <span className="text-lg font-medium text-goldLight" style={{ fontFamily: T.fonts.sans }}>
+      {/* ── Info ── */}
+      <div className="px-3 pb-3 pt-2.5">
+        <p
+          className="mb-0.5 text-[0.46rem] font-black uppercase tracking-[0.2em]"
+          style={{ color: T.sage, fontFamily: T.fonts.sans }}
+        >
+          {product.unit}
+        </p>
+        <Link href={`/products/${product.slug}`}>
+          <h3
+            className="line-clamp-1 leading-tight hover:text-gold transition-colors duration-150"
+            style={{ fontFamily: T.fonts.serif, fontWeight: 400, fontSize: "0.88rem", color: T.cream, letterSpacing: "0.015em" }}
+          >
+            {product.name}
+          </h3>
+        </Link>
+        <div
+          className="mt-2 flex items-center justify-between"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: "0.4rem" }}
+        >
+          <span style={{ color: T.goldLight, fontFamily: T.fonts.sans, fontSize: "0.78rem", fontWeight: 600 }}>
             Rs {product.price.toLocaleString()}
           </span>
           {product.compareAtPrice && (
-            <span className="text-sm text-creamDim line-through" style={{ fontFamily: T.fonts.sans }}>
+            <span style={{ color: T.creamDim, fontFamily: T.fonts.sans, fontSize: "0.65rem", textDecoration: "line-through" }}>
               Rs {product.compareAtPrice.toLocaleString()}
             </span>
           )}
@@ -259,39 +262,39 @@ function ShopProductCard({ product, priority = false }: { product: ShopProduct; 
   );
 }
 
+// ─── Main ShopCatalog ──────────────────────────────────────────────────────────
 export function ShopCatalog({ initialQuery = "", initialCategory }: ShopCatalogProps) {
   const { products } = useStore();
-  const hasInitialCategory = Boolean(
-    initialCategory && shopCategories.some((category) => category.id === initialCategory)
-  );
+  const hasInitialCategory = Boolean(initialCategory && shopCategories.some((c) => c.id === initialCategory));
   const preferredCategory: ShopCategoryId = hasInitialCategory ? (initialCategory as ShopCategoryId) : "vegetables";
 
-  const [search, setSearch] = useState(initialQuery);
-  const [sortBy, setSortBy] = useState<SortOption>("popularity");
+  const [search,        setSearch]        = useState(initialQuery);
+  const [sortBy,        setSortBy]        = useState<SortOption>("popularity");
   const [activeFilters, setActiveFilters] = useState<FilterOption[]>([]);
-  const [activeCategory, setActiveCategory] = useState<ShopCategoryId>(preferredCategory);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [showFilters, setShowFilters] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
+  const [activeCategory,setActiveCategory]= useState<ShopCategoryId>(preferredCategory);
+  const [viewMode,      setViewMode]      = useState<"grid" | "list">("grid");
+  const [showFilters,   setShowFilters]   = useState(false);
+  const [sortOpen,      setSortOpen]      = useState(false);
   const initialScrollDone = useRef(false);
 
   useEffect(() => setSearch(initialQuery), [initialQuery]);
 
+  // ── IntersectionObserver for active category tab ──
   useEffect(() => {
     const sections = shopCategories
-      .map((category) => document.getElementById(category.id))
+      .map((c) => document.getElementById(c.id))
       .filter((s): s is HTMLElement => Boolean(s));
-
-    if (sections.length === 0) return;
+    if (!sections.length) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
         if (visible?.target.id) setActiveCategory(visible.target.id as ShopCategoryId);
       },
-      { rootMargin: "-24% 0px -56% 0px", threshold: [0.2, 0.45, 0.7] }
+      { rootMargin: `-${TABS_TOP + TABBAR_H + 8}px 0px -50% 0px`, threshold: [0.1, 0.3, 0.5] }
     );
-
     sections.forEach((s) => observer.observe(s));
     return () => observer.disconnect();
   }, []);
@@ -300,291 +303,291 @@ export function ShopCatalog({ initialQuery = "", initialCategory }: ShopCatalogP
     if (initialScrollDone.current || !hasInitialCategory) return;
     initialScrollDone.current = true;
     setActiveCategory(preferredCategory);
-    window.requestAnimationFrame(() => document.getElementById(preferredCategory)?.scrollIntoView({ block: "start", behavior: "auto" }));
+    window.requestAnimationFrame(() =>
+      document.getElementById(preferredCategory)?.scrollIntoView({ block: "start", behavior: "auto" })
+    );
   }, [hasInitialCategory, preferredCategory]);
 
   const query = search.trim().toLowerCase();
 
   const filteredProducts = useMemo(
-    () =>
-      products.filter((product) => {
-        const matchesSearch =
-          query.length === 0 ||
-          product.name.toLowerCase().includes(query) ||
-          product.unit.toLowerCase().includes(query) ||
-          product.shortDescription.toLowerCase().includes(query) ||
-          product.origin.toLowerCase().includes(query) ||
-          product.category.toLowerCase().includes(query);
-
-        return matchesSearch && matchesFilters([product], activeFilters);
-      }),
+    () => products.filter((p) => {
+      const matchesSearch =
+        !query ||
+        p.name.toLowerCase().includes(query) ||
+        p.unit.toLowerCase().includes(query) ||
+        p.shortDescription.toLowerCase().includes(query) ||
+        p.origin.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query);
+      return matchesSearch && matchesFilters(p, activeFilters);
+    }),
     [activeFilters, products, query]
   );
 
   const categorySections = useMemo(
-    () =>
-      shopCategories.map((category) => ({
-        ...category,
-        products: sortProducts(filteredProducts.filter((p) => p.category === category.id), sortBy)
-      })),
+    () => shopCategories.map((c) => ({
+      ...c,
+      products: sortProducts(filteredProducts.filter((p) => p.category === c.id), sortBy),
+    })),
     [filteredProducts, sortBy]
   );
 
   const visibleSections = useMemo(() => {
     if (!query && activeFilters.length === 0) return categorySections;
-    return categorySections.filter((section) => section.products.length > 0);
+    return categorySections.filter((s) => s.products.length > 0);
   }, [activeFilters.length, categorySections, query]);
 
-  const featuredMatches = useMemo(() => sortProducts(filteredProducts, sortBy).slice(0, 3), [filteredProducts, sortBy]);
-  const quickSearches = useMemo(() => [...products].sort((l, r) => r.popularity - l.popularity).slice(0, 4).map((p) => p.name), [products]);
-  const resultsCount = filteredProducts.length;
+  const featuredMatches = useMemo(() => sortProducts(filteredProducts, sortBy).slice(0, 5), [filteredProducts, sortBy]);
+  const quickSearches   = useMemo(() => [...products].sort((l, r) => r.popularity - l.popularity).slice(0, 4).map((p) => p.name), [products]);
+  const resultsCount    = filteredProducts.length;
 
-  function toggleFilter(filter: FilterOption) {
-    setActiveFilters((current) => (current.includes(filter) ? current.filter((i) => i !== filter) : [...current, filter]));
+  function toggleFilter(f: FilterOption) {
+    setActiveFilters((cur) => cur.includes(f) ? cur.filter((i) => i !== f) : [...cur, f]);
+  }
+  function clearAllFilters() { setActiveFilters([]); setSearch(""); }
+  function scrollToCategory(id: ShopCategoryId) {
+    setActiveCategory(id);
+    const el = document.getElementById(id);
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY - (TABS_TOP + TABBAR_H + 12);
+    window.scrollTo({ top: y, behavior: "smooth" });
   }
 
-  function clearAllFilters() {
-    setActiveFilters([]);
-    setSearch("");
-  }
-
-  function scrollToCategory(categoryId: ShopCategoryId) {
-    setActiveCategory(categoryId);
-    document.getElementById(categoryId)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  // Grid class for 5-col
+  const gridClass = viewMode === "grid"
+    ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3"
+    : "flex flex-col gap-3";
 
   return (
     <div className="min-h-screen" style={{ background: T.forest, fontFamily: T.fonts.sans }}>
-      {/* Sticky Header with Search and Filters */}
-      <div className="sticky top-[73px] z-30 backdrop-blur-md" style={{ background: `${T.forest}EE` }}>
-        <div className="mx-auto max-w-[1280px] px-6 lg:px-12 py-4">
-          <div className="flex items-center justify-between gap-4">
-            {/* Search Bar */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: T.creamDim }} />
+
+      {/* ── Sticky Search + Controls bar ───────────────────────────────────── */}
+      <div
+        className="sticky z-30 backdrop-blur-md"
+        style={{ top: SEARCH_TOP, background: `${T.forest}F0`, borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+      >
+        <div className="mx-auto max-w-[1440px] px-6 lg:px-10 py-3">
+          <div className="flex items-center gap-3">
+
+            {/* Search */}
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2" style={{ color: T.creamDim }} />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search products..."
-                className="w-full rounded-full border border-white/10 py-3 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-gold/30 transition-all"
-                style={{ background: T.forestLight, color: T.cream, fontFamily: T.fonts.sans }}
+                placeholder="Search products…"
+                className="w-full rounded-full border border-white/10 py-2.5 pl-9 pr-4 text-[0.8rem] focus:outline-none focus:ring-2 transition-all"
+                style={{ background: T.forestLight, color: T.cream, fontFamily: T.fonts.sans, focusRingColor: T.gold }}
               />
               {search && (
-                <button
-                  onClick={() => setSearch("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                  style={{ color: T.creamDim }}
-                >
-                  <X className="h-4 w-4" />
+                <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: T.creamDim }}>
+                  <X className="h-3.5 w-3.5" />
                 </button>
               )}
             </div>
 
-            {/* View Controls */}
-            <div className="flex items-center gap-3">
-              {/* Mobile Filter Toggle */}
+            {/* Filter chips — desktop */}
+            <div className="hidden lg:flex items-center gap-2">
+              {filterOptions.map((f) => {
+                const active = activeFilters.includes(f.value);
+                return (
+                  <button
+                    key={f.value}
+                    onClick={() => toggleFilter(f.value)}
+                    className="rounded-full px-3.5 py-2 text-[0.7rem] font-bold uppercase tracking-[0.1em] transition-all duration-150"
+                    style={{
+                      background: active ? T.gold : T.forestLight,
+                      color: active ? T.forest : T.creamDim,
+                      border: `1px solid ${active ? T.gold : "rgba(255,255,255,0.08)"}`,
+                      fontFamily: T.fonts.sans,
+                    }}
+                  >
+                    {f.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Mobile filter toggle */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="lg:hidden inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3.5 py-2 text-[0.75rem] font-bold transition-all"
+              style={{ background: T.forestLight, color: T.cream }}
+            >
+              <Filter className="h-3.5 w-3.5" />
+              Filters
+              {activeFilters.length > 0 && (
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[9px] text-forest font-black">
+                  {activeFilters.length}
+                </span>
+              )}
+            </button>
+
+            {/* Sort */}
+            <div className="relative">
               <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="lg:hidden inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-semibold transition-all"
+                onClick={() => setSortOpen(!sortOpen)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3.5 py-2 text-[0.75rem] font-bold transition-all"
                 style={{ background: T.forestLight, color: T.cream }}
               >
-                <Filter className="h-4 w-4" />
-                Filters
-                {activeFilters.length > 0 && (
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold text-[10px] text-forest font-bold">
-                    {activeFilters.length}
-                  </span>
-                )}
+                <ArrowUpDown className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{sortOptions.find((o) => o.value === sortBy)?.label}</span>
+                <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", sortOpen && "rotate-180")} />
               </button>
+              <AnimatePresence>
+                {sortOpen && (
+                  <MotionDiv
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 w-52 rounded-2xl border border-white/10 p-1.5 shadow-2xl"
+                    style={{ background: T.forestMid, zIndex: 50 }}
+                  >
+                    {sortOptions.map((o) => (
+                      <button
+                        key={o.value}
+                        onClick={() => { setSortBy(o.value); setSortOpen(false); }}
+                        className="w-full text-left rounded-xl px-4 py-2.5 text-[0.78rem] font-medium transition-colors"
+                        style={{
+                          background: sortBy === o.value ? "rgba(201,168,76,0.15)" : "transparent",
+                          color: sortBy === o.value ? T.gold : "rgba(244,239,228,0.65)",
+                          fontFamily: T.fonts.sans,
+                        }}
+                      >
+                        {o.label}
+                      </button>
+                    ))}
+                  </MotionDiv>
+                )}
+              </AnimatePresence>
+            </div>
 
-              {/* Sort Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setSortOpen(!sortOpen)}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-semibold transition-all"
-                  style={{ background: T.forestLight, color: T.cream }}
-                >
-                  <ArrowUpDown className="h-4 w-4" />
-                  {sortOptions.find((o) => o.value === sortBy)?.label}
-                  <ChevronDown className={cn("h-4 w-4 transition-transform", sortOpen && "rotate-180")} />
-                </button>
-                
-                <AnimatePresence>
-                  {sortOpen && (
-                    <MotionDiv
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-white/10 p-2 shadow-xl"
-                      style={{ background: T.forestMid }}
-                    >
-                      {sortOptions.map((option) => (
-                        <button
-                          key={option.value}
-                          onClick={() => {
-                            setSortBy(option.value);
-                            setSortOpen(false);
-                          }}
-                          className={cn(
-                            "w-full text-left rounded-xl px-4 py-3 text-sm font-medium transition-colors",
-                            sortBy === option.value
-                              ? "bg-gold/20 text-gold"
-                              : "text-cream/70 hover:bg-white/5 hover:text-cream"
-                          )}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </MotionDiv>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* View Mode Toggle */}
-              <div className="hidden lg:flex items-center rounded-full border border-white/10 p-1" style={{ background: T.forestLight }}>
-                <button
-                  onClick={() => setViewMode("grid")}
-                  className={cn(
-                    "p-2 rounded-full transition-colors",
-                    viewMode === "grid" ? "bg-gold/20 text-gold" : "text-cream/50 hover:text-cream"
-                  )}
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={cn(
-                    "p-2 rounded-full transition-colors",
-                    viewMode === "list" ? "bg-gold/20 text-gold" : "text-cream/50 hover:text-cream"
-                  )}
-                >
-                  <List className="h-4 w-4" />
-                </button>
-              </div>
+            {/* View toggle */}
+            <div className="hidden lg:flex items-center rounded-full border border-white/10 p-1" style={{ background: T.forestLight }}>
+              {(["grid", "list"] as const).map((mode) => {
+                const Icon = mode === "grid" ? Grid3X3 : List;
+                return (
+                  <button
+                    key={mode}
+                    onClick={() => setViewMode(mode)}
+                    className="p-1.5 rounded-full transition-colors"
+                    style={{ background: viewMode === mode ? "rgba(201,168,76,0.2)" : "transparent", color: viewMode === mode ? T.gold : "rgba(244,239,228,0.4)" }}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Active Filters Display */}
+          {/* Active filter chips row */}
           {(activeFilters.length > 0 || search) && (
-            <div className="mt-4 flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm" style={{ color: T.creamDim }}>Active:</span>
+            <div className="mt-2.5 flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[0.7rem]" style={{ color: T.creamDim }}>Active:</span>
                 {search && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-gold/30 px-3 py-1 text-xs font-medium text-gold">
-                    Search: {search}
-                    <button onClick={() => setSearch("")} className="ml-1 hover:text-goldLight">
-                      <X className="h-3 w-3" />
-                    </button>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-gold/30 px-2.5 py-0.5 text-[0.65rem] font-medium text-gold">
+                    "{search}"
+                    <button onClick={() => setSearch("")}><X className="h-2.5 w-2.5" /></button>
                   </span>
                 )}
-                {activeFilters.map((filter) => {
-                  const filterOption = filterOptions.find((f) => f.value === filter);
-                  return (
-                    <span
-                      key={filter}
-                      className="inline-flex items-center gap-1 rounded-full border border-gold/30 px-3 py-1 text-xs font-medium text-gold"
-                    >
-                      {filterOption?.label}
-                      <button onClick={() => toggleFilter(filter)} className="ml-1 hover:text-goldLight">
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  );
-                })}
-                <button
-                  onClick={clearAllFilters}
-                  className="text-xs font-medium text-gold hover:text-goldLight underline"
-                >
+                {activeFilters.map((f) => (
+                  <span key={f} className="inline-flex items-center gap-1 rounded-full border border-gold/30 px-2.5 py-0.5 text-[0.65rem] font-medium text-gold">
+                    {filterOptions.find((o) => o.value === f)?.label}
+                    <button onClick={() => toggleFilter(f)}><X className="h-2.5 w-2.5" /></button>
+                  </span>
+                ))}
+                <button onClick={clearAllFilters} className="text-[0.65rem] font-semibold text-gold underline hover:text-goldLight">
                   Clear all
                 </button>
               </div>
-              <span className="text-sm" style={{ color: T.creamDim }}>{resultsCount} results</span>
+              <span className="text-[0.7rem]" style={{ color: T.creamDim }}>{resultsCount} results</span>
             </div>
           )}
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1280px] px-6 lg:px-12 py-8">
-        {/* Category Navigation Tabs */}
-        <div className="sticky top-[180px] z-20 -mx-6 px-6 mb-8 lg:top-[190px]">
-          <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
-            {shopCategories.map((category) => {
-              const Icon = categoryIcons[category.id];
-              const isActive = activeCategory === category.id;
+      {/* ── Sticky Category Tabs ───────────────────────────────────────────── */}
+      <div
+        className="sticky z-20"
+        style={{ top: TABS_TOP, background: `${T.forest}F5`, borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+      >
+        <div className="mx-auto max-w-[1440px] px-6 lg:px-10">
+          <div className="flex gap-1.5 overflow-x-auto py-3 scrollbar-hide">
+            {shopCategories.map((cat) => {
+              const Icon = categoryIcons[cat.id];
+              const isActive = activeCategory === cat.id;
               return (
                 <button
-                  key={category.id}
-                  onClick={() => scrollToCategory(category.id)}
-                  className={cn(
-                    "flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold uppercase tracking-[0.1em] whitespace-nowrap transition-all",
-                    isActive
-                      ? "bg-gold text-forest shadow-lg"
-                      : "border border-white/10 text-cream/60 hover:border-gold/50 hover:text-gold"
-                  )}
-                  style={{ 
+                  key={cat.id}
+                  onClick={() => scrollToCategory(cat.id)}
+                  className="flex items-center gap-1.5 rounded-full px-4 py-2 text-[0.7rem] font-black uppercase tracking-[0.12em] whitespace-nowrap transition-all duration-200"
+                  style={{
                     background: isActive ? T.gold : T.forestLight,
-                    fontFamily: T.fonts.sans 
+                    color: isActive ? T.forest : "rgba(244,239,228,0.55)",
+                    border: `1px solid ${isActive ? T.gold : "rgba(255,255,255,0.07)"}`,
+                    boxShadow: isActive ? `0 4px 16px rgba(201,168,76,0.35)` : "none",
+                    fontFamily: T.fonts.sans,
                   }}
                 >
-                  <Icon className="h-4 w-4" />
-                  {category.title}
+                  <Icon className="h-3.5 w-3.5" />
+                  {cat.title}
                 </button>
               );
             })}
           </div>
         </div>
+      </div>
 
-        {/* Main Content */}
-        {resultsCount > 0 && (query || activeFilters.length > 0) ? (
-          <section className="mt-8">
+      {/* ── Main content ──────────────────────────────────────────────────── */}
+      <div className="mx-auto max-w-[1440px] px-6 lg:px-10 py-6">
+
+        {/* Search results header */}
+        {resultsCount > 0 && (query || activeFilters.length > 0) && (
+          <section className="mb-10">
             <Reveal>
-              <div className="flex items-end justify-between gap-4">
+              <div className="flex items-end justify-between gap-4 mb-6">
                 <div>
                   <SectionLabel>Search Results</SectionLabel>
-                  <h2 className="mt-3 leading-[1.05]" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.5rem, 4vw, 2.5rem)", color: T.cream }}>
-                    Best matches for you
+                  <h2 className="mt-2" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.4rem,3vw,2.2rem)", color: T.cream }}>
+                    Best matches
                   </h2>
                 </div>
-                <p className="text-sm" style={{ color: T.creamDim }}>{resultsCount} products found</p>
+                <p className="text-[0.75rem]" style={{ color: T.creamDim }}>{resultsCount} found</p>
               </div>
             </Reveal>
-
-            <div className={cn(
-              "mt-6 gap-4",
-              viewMode === "grid" ? "grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "flex flex-col gap-4"
-            )}>
-              {featuredMatches.map((product, index) => (
-                <ShopProductCard key={product.id} product={product} priority={index === 0} />
-              ))}
+            <div className={gridClass}>
+              {featuredMatches.map((p, i) => <ShopProductCard key={p.id} product={p} priority={i === 0} />)}
             </div>
           </section>
-        ) : null}
+        )}
 
-        {resultsCount === 0 ? (
-          <section className="mt-8 rounded-2xl border border-white/10 px-6 py-16 text-center" style={{ background: T.forestMid }}>
+        {/* Empty state */}
+        {resultsCount === 0 && (
+          <section
+            className="mt-6 rounded-3xl border border-white/10 px-6 py-14 text-center"
+            style={{ background: T.forestMid }}
+          >
             <Reveal>
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full" style={{ background: T.forestLight }}>
-                <Search className="h-10 w-10" style={{ color: T.sage }} />
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: T.forestLight }}>
+                <Search className="h-8 w-8" style={{ color: T.sage }} />
               </div>
-              <p className="mt-6 text-sm font-bold uppercase tracking-[0.2em]" style={{ color: T.gold, fontFamily: T.fonts.sans }}>No matches found</p>
-              <h2 className="mt-3 leading-tight" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.5rem, 4vw, 2.5rem)", color: T.cream }}>
-                Nothing matches this search yet.
+              <p className="mt-5 text-[0.6rem] font-black uppercase tracking-[0.25em]" style={{ color: T.gold }}>No matches found</p>
+              <h2 className="mt-2" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.3rem,3vw,2rem)", color: T.cream }}>
+                Nothing matches yet
               </h2>
-              <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed" style={{ color: T.creamDim, fontFamily: T.fonts.sans }}>
-                Try a simpler product name or remove some filters to see more products.
+              <p className="mx-auto mt-2 max-w-md text-[0.82rem] leading-relaxed" style={{ color: T.creamDim }}>
+                Try a simpler name or remove some filters.
               </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <div className="mt-6 flex flex-wrap justify-center gap-2">
                 {quickSearches.map((term) => (
                   <button
                     key={term}
-                    type="button"
-                    onClick={() => {
-                      setSearch(term);
-                      setActiveFilters([]);
-                    }}
-                    className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold transition-all hover:border-gold/50 hover:text-gold"
-                    style={{ background: T.forestLight, color: T.cream, fontFamily: T.fonts.sans }}
+                    onClick={() => { setSearch(term); setActiveFilters([]); }}
+                    className="rounded-full border border-white/10 px-4 py-2 text-[0.75rem] font-semibold transition-all hover:border-gold/50 hover:text-gold"
+                    style={{ background: T.forestLight, color: T.cream }}
                   >
                     {term}
                   </button>
@@ -592,37 +595,53 @@ export function ShopCatalog({ initialQuery = "", initialCategory }: ShopCatalogP
               </div>
             </Reveal>
           </section>
-        ) : (
-          <div className="mt-8 space-y-16">
+        )}
+
+        {/* Category sections */}
+        {resultsCount > 0 && (
+          <div className="space-y-14">
             {visibleSections.map((section) => {
               const Icon = categoryIcons[section.id];
-
               return (
-                <section key={section.id} id={section.id} className="scroll-mt-48">
+                <section
+                  key={section.id}
+                  id={section.id}
+                  style={{ scrollMarginTop: SCROLL_MT }}
+                >
                   <Reveal>
-                    <div className="flex flex-col gap-6 pb-8" style={{ borderBottom: `1px solid ${T.forestLight}` }}>
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl" style={{ background: T.forestLight, border: `1px solid ${T.gold}/20` }}>
-                          <Icon className="h-6 w-6" style={{ color: T.gold }} />
+                    <div
+                      className="flex flex-col gap-4 pb-6 mb-6"
+                      style={{ borderBottom: `1px solid rgba(255,255,255,0.06)` }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="flex h-11 w-11 items-center justify-center rounded-xl"
+                          style={{ background: T.forestLight, border: `1px solid rgba(201,168,76,0.2)` }}
+                        >
+                          <Icon className="h-5 w-5" style={{ color: T.gold }} />
                         </div>
                         <div>
-                          <p className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: T.gold, fontFamily: T.fonts.sans }}>{section.title}</p>
-                          <h2 className="leading-[1.05]" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.5rem, 4vw, 2.5rem)", color: T.cream }}>{section.subtitle}</h2>
+                          <p className="text-[0.55rem] font-black uppercase tracking-[0.25em]" style={{ color: T.gold }}>{section.title}</p>
+                          <h2 className="leading-tight" style={{ fontFamily: T.fonts.serif, fontWeight: 300, fontSize: "clamp(1.2rem,2.5vw,1.9rem)", color: T.cream }}>
+                            {section.subtitle}
+                          </h2>
                         </div>
+                        <span
+                          className="ml-auto rounded-full border border-gold/25 px-3 py-1 text-[0.65rem] font-semibold"
+                          style={{ color: T.gold }}
+                        >
+                          {section.products.length} picks
+                        </span>
                       </div>
-                      <p className="max-w-2xl text-base leading-relaxed" style={{ color: T.creamDim, fontFamily: T.fonts.sans }}>{section.blurb}</p>
-                      <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 px-4 py-2 text-sm font-semibold w-fit" style={{ color: T.gold, fontFamily: T.fonts.sans }}>
-                        {section.products.length} curated picks
-                      </div>
+                      <p className="max-w-xl text-[0.8rem] leading-relaxed" style={{ color: T.creamDim }}>
+                        {section.blurb}
+                      </p>
                     </div>
                   </Reveal>
 
-                  <div className={cn(
-                    "mt-8 gap-4",
-                    viewMode === "grid" ? "grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "flex flex-col gap-4"
-                  )}>
-                    {section.products.map((product, index) => (
-                      <ShopProductCard key={product.id} product={product} priority={section.id === activeCategory && index === 0} />
+                  <div className={gridClass}>
+                    {section.products.map((p, i) => (
+                      <ShopProductCard key={p.id} product={p} priority={section.id === activeCategory && i === 0} />
                     ))}
                   </div>
                 </section>
