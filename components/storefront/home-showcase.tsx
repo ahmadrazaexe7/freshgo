@@ -266,7 +266,7 @@ function CategoryShowcase() {
   const categoryImages: Record<string, string> = {
     vegetables: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200",
     fruits: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=1200",
-    groceries: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=1200",
+    groceries: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   };
 
   return (
