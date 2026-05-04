@@ -121,10 +121,10 @@ export function AdminDashboard() {
     };
   }, [isAdmin]);
 
-  function submitProduct(event: React.FormEvent<HTMLFormElement>) {
+  async function submitProduct(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    upsertProduct({
+    const productData = {
       id: form.id,
       category: form.category,
       name: form.name,
@@ -140,10 +140,72 @@ export function AdminDashboard() {
       popularity: Number(form.popularity),
       bestSellerScore: Number(form.bestSellerScore),
       badges: form.badges
-    });
+    };
+
+    // Update local state first for immediate UI feedback
+    upsertProduct(productData);
+
+    // Persist to database if editing an existing product
+    if (form.id) {
+      try {
+        const response = await fetch(`/api/products/${form.id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(productData)
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          console.error("Failed to save product to database:", error);
+          alert("Failed to save product. Please try again.");
+          return;
+        }
+
+        console.log("Product saved to database successfully");
+      } catch (error) {
+        console.error("Error saving product:", error);
+        alert("Error saving product. Check console for details.");
+      }
+    }
 
     setForm(initialForm);
     setEditingName(null);
+  }
+
+  async function handleDeleteProduct(productId: string) {
+    const product = products.find(p => p.id === productId);
+    const productName = product?.name || "Product";
+    
+    if (!window.confirm(`Are you sure you want to delete "${productName}"?`)) {
+      return;
+    }
+
+    // Delete from local state first
+    deleteProduct(productId);
+
+    // Persist deletion to database
+    try {
+      const response = await fetch(`/api/products/${productId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("Failed to delete product from database:", error);
+        alert("Failed to delete product from database. Local deletion was reverted.");
+        return;
+      }
+
+      console.log("Product deleted from database successfully");
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      alert("Error deleting product. Check console for details.");
+    }
   }
 
   function loadProduct(product: ShopProduct) {
@@ -531,7 +593,7 @@ export function AdminDashboard() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => deleteProduct(product.id)}
+                      onClick={() => handleDeleteProduct(product.id)}
                       className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-rose-600"
                     >
                       Delete

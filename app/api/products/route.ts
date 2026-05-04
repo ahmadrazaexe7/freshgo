@@ -1,4 +1,5 @@
-import { shopProducts } from "@/data/shop-catalog";
+import { db } from "@/lib/db";
+import { auth } from "@/lib/auth";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -6,48 +7,99 @@ export async function GET(request: Request) {
   const search = searchParams.get("search")?.toLowerCase() ?? "";
   const sort = searchParams.get("sort") ?? "popularity";
 
-  const products = shopProducts
-    .filter((product) => (category ? product.category === category : true))
-    .filter((product) =>
-      search
-        ? [product.name, product.shortDescription, product.origin, product.unit]
-            .join(" ")
-            .toLowerCase()
-            .includes(search)
-        : true
-    )
-    .sort((left, right) => {
-      switch (sort) {
-        case "price-low":
-          return left.price - right.price;
-        case "price-high":
-          return right.price - left.price;
-        case "newest":
-          return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
-        case "best-selling":
-          return right.bestSellerScore - left.bestSellerScore;
-        case "popularity":
-        default:
-          return right.popularity - left.popularity;
+  try {
+    // Build where clause
+    const where: any = {};
+
+    if (category) {
+      const dbCategory = await db.category.findUnique({
+        where: { slug: category }
+      });
+      if (dbCategory) {
+        where.categoryId = dbCategory.id;
+      }
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } }
+      ];
+    }
+
+    // Build order by
+    let orderBy: any = { featured: "desc" };
+    
+    switch (sort) {
+      case "price-low":
+        orderBy = { price: "asc" };
+        break;
+      case "price-high":
+        orderBy = { price: "desc" };
+        break;
+      case "newest":
+        orderBy = { createdAt: "desc" };
+        break;
+      default:
+        orderBy = { featured: "desc" };
+    }
+
+    const products = await db.product.findMany({
+      where,
+      orderBy,
+      include: {
+        category: true
       }
     });
 
-  return Response.json({
-    ok: true,
-    total: products.length,
-    products
-  });
+    return Response.json({
+      ok: true,
+      total: products.length,
+      products
+    });
+  } catch (error) {
+    console.error("Failed to fetch products:", error);
+    return Response.json({ ok: false, message: "Failed to fetch products" }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  try {
+    // Check authentication
+    const session = await auth();
+    if (session?.user?.role !== "ADMIN") {
+      return Response.json({ ok: false, message: "Unauthorized" }, { status: 401 });
+    }
 
-  return Response.json(
-    {
+    const body = await request.json();
+
+    // Create product in database
+    const product = await db.product.create({
+      data: {
+        name: body.name,
+        slug: body.slug,
+        description: body.description,
+        image: body.image,
+        price: parseFloat(body.price),
+        salePrice: body.salePrice ? parseFloat(body.salePrice) : null,
+        unit: body.unit,
+        inventory: parseInt(body.inventory),
+        featured: body.featured ?? false,
+        published: body.published ?? true,
+        categoryId: body.categoryId
+      }
+    });
+
+    return Response.json({
       ok: true,
-      message: "Demo product accepted. Persist this with Prisma in production mode.",
-      product: {
-        id: `demo-${Date.now()}`,
+      message: "Product created successfully",
+      product
+    });
+  } catch (error: any) {
+    console.error("Failed to create product:", error);
+    return Response.json({ ok: false, message: "Failed to create product" }, { status: 500 });
+  }
+}
         ...body
       }
     },
