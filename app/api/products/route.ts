@@ -73,6 +73,19 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
+    // Find category by slug if category is provided instead of categoryId
+    let categoryId = body.categoryId;
+    if (!categoryId && body.category) {
+      const category = await db.category.findUnique({
+        where: { slug: body.category }
+      });
+      if (category) {
+        categoryId = category.id;
+      } else {
+        return Response.json({ ok: false, message: "Invalid category" }, { status: 400 });
+      }
+    }
+
     // Create product in database
     const product = await db.product.create({
       data: {
@@ -86,7 +99,7 @@ export async function POST(request: Request) {
         inventory: parseInt(body.inventory),
         featured: body.featured ?? false,
         published: body.published ?? true,
-        categoryId: body.categoryId
+        categoryId: categoryId
       }
     });
 

@@ -37,22 +37,42 @@ export async function PATCH(request: Request) {
 
     const body = await request.json();
 
+    // Find category by slug if category is provided instead of categoryId
+    let categoryId = body.categoryId;
+    if (!categoryId && body.category) {
+      const category = await db.category.findUnique({
+        where: { slug: body.category }
+      });
+      if (category) {
+        categoryId = category.id;
+      } else {
+        return Response.json({ ok: false, message: "Invalid category" }, { status: 400 });
+      }
+    }
+
+    // Prepare update data
+    const updateData: any = {
+      name: body.name,
+      slug: body.slug,
+      description: body.description,
+      price: body.price ? parseFloat(body.price) : undefined,
+      salePrice: body.salePrice ? parseFloat(body.salePrice) : null,
+      unit: body.unit,
+      inventory: body.inventory ? parseInt(body.inventory) : undefined,
+      featured: body.featured ?? false,
+      published: body.published ?? true,
+      image: body.image
+    };
+
+    // Only include categoryId if it was found or provided
+    if (categoryId) {
+      updateData.categoryId = categoryId;
+    }
+
     // Update product in database
     const updated = await db.product.update({
       where: { id: productId },
-      data: {
-        name: body.name,
-        slug: body.slug,
-        description: body.description,
-        price: body.price ? parseFloat(body.price) : undefined,
-        salePrice: body.salePrice ? parseFloat(body.salePrice) : null,
-        unit: body.unit,
-        inventory: body.inventory ? parseInt(body.inventory) : undefined,
-        featured: body.featured ?? false,
-        published: body.published ?? true,
-        image: body.image,
-        categoryId: body.categoryId
-      }
+      data: updateData
     });
 
     return Response.json({

@@ -309,22 +309,37 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         const data = await response.json();
         if (!mounted || !Array.isArray(data.products)) return;
 
-        // Merge fetched products with custom products from localStorage
-        const fetchedProducts = data.products as ShopProduct[];
-        
-        setState((current) => {
-          const staticProductIds = new Set(fetchedProducts.map((p) => p.id));
-          const customProducts = current.products.filter((p) => !staticProductIds.has(p.id));
-          const mergedProducts = [...fetchedProducts, ...customProducts];
+        // Convert database products to ShopProduct format
+        const dbProducts = data.products.map((dbProduct: any) => ({
+          id: dbProduct.id,
+          slug: dbProduct.slug,
+          sku: `FHM-${dbProduct.id.slice(-6).toUpperCase()}`,
+          category: dbProduct.category?.slug || "vegetables", // Map category slug
+          name: dbProduct.name,
+          unit: dbProduct.unit,
+          price: Number(dbProduct.price),
+          compareAtPrice: dbProduct.salePrice ? Number(dbProduct.salePrice) : undefined,
+          popularity: 80, // Default values for fields not in DB
+          bestSellerScore: 80,
+          createdAt: dbProduct.createdAt || new Date().toISOString().slice(0, 10),
+          image: dbProduct.image,
+          badges: dbProduct.featured ? ["Fresh"] : [],
+          shortDescription: dbProduct.description?.slice(0, 100) || "",
+          description: dbProduct.description || "",
+          origin: "Local", // Default
+          inventory: dbProduct.inventory,
+          highlights: [dbProduct.category?.name || "Fresh", `${dbProduct.inventory} in stock`]
+        }));
 
+        setState((current) => {
           // Update order items with latest product prices
           return {
             ...current,
-            products: mergedProducts,
+            products: dbProducts,
             orders: current.orders.map(order => ({
               ...order,
               items: order.items.map(item => {
-                const updated = mergedProducts.find(p => p.id === item.productId);
+                const updated = dbProducts.find((p: ShopProduct) => p.id === item.productId);
                 return updated ? { ...item, image: updated.image, price: updated.price } : item;
               })
             }))

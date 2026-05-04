@@ -125,61 +125,92 @@ export function AdminDashboard() {
     event.preventDefault();
 
     const productData = {
-      id: form.id,
       category: form.category,
       name: form.name,
       slug: form.slug || form.name.toLowerCase().replace(/\s+/g, "-"),
       unit: form.unit,
       price: Number(form.price),
-      compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : undefined,
+      salePrice: form.compareAtPrice ? Number(form.compareAtPrice) : null,
       image: form.image,
-      shortDescription: form.shortDescription,
       description: form.description,
-      origin: form.origin,
-      inventory: Number(form.inventory),
-      popularity: Number(form.popularity),
-      bestSellerScore: Number(form.bestSellerScore),
-      badges: form.badges
+      inventory: Number(form.inventory)
     };
 
     // Update local state first for immediate UI feedback
-    upsertProduct(productData);
+    upsertProduct({
+      ...productData,
+      id: form.id,
+      compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : undefined,
+      shortDescription: form.shortDescription,
+      origin: form.origin,
+      popularity: Number(form.popularity),
+      bestSellerScore: Number(form.bestSellerScore),
+      badges: form.badges
+    });
 
-    // Persist to database if editing an existing product
-    if (form.id) {
-      try {
-        const response = await fetch(`/api/products/${form.id}`, {
+    try {
+      let response;
+      let apiData;
+
+      if (form.id) {
+        // Update existing product
+        response = await fetch(`/api/products/${form.id}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify(productData)
         });
-
-        if (!response.ok) {
-          const error = await response.json();
-          console.error("Failed to save product to database:", error);
-          alert("Failed to save product. Please try again.");
-          return;
-        }
-
-        const result = await response.json();
-        console.log("Product saved to database successfully", result);
-
-        // Refresh products list to ensure consistency
-        try {
-          const productsRes = await fetch("/api/products");
-          if (productsRes.ok) {
-            const productsData = await productsRes.json();
-            // Products will be fetched by the store provider automatically
-          }
-        } catch (err) {
-          console.error("Failed to refresh products list:", err);
-        }
-      } catch (error) {
-        console.error("Error saving product:", error);
-        alert("Error saving product. Check console for details.");
+        apiData = productData;
+      } else {
+        // Create new product
+        response = await fetch("/api/products", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(productData)
+        });
+        apiData = productData;
       }
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("Failed to save product to database:", error);
+        alert(`Failed to save product: ${error.message}`);
+        return;
+      }
+
+      const result = await response.json();
+      console.log("Product saved to database successfully", result);
+
+      // If it was a new product, update the local state with the returned ID
+      if (!form.id && result.product?.id) {
+        upsertProduct({
+          ...productData,
+          id: result.product.id,
+          compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : undefined,
+          shortDescription: form.shortDescription,
+          origin: form.origin,
+          popularity: Number(form.popularity),
+          bestSellerScore: Number(form.bestSellerScore),
+          badges: form.badges
+        });
+      }
+
+      // Refresh products list to ensure consistency
+      try {
+        const productsRes = await fetch("/api/products");
+        if (productsRes.ok) {
+          const productsData = await productsRes.json();
+          // Products will be fetched by the store provider automatically
+        }
+      } catch (err) {
+        console.error("Failed to refresh products list:", err);
+      }
+    } catch (error) {
+      console.error("Error saving product:", error);
+      alert("Error saving product. Check console for details.");
     }
 
     setForm(initialForm);
