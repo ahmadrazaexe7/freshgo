@@ -45,15 +45,35 @@ const initialForm: EditableProduct = {
 };
 
 export function AdminDashboard() {
-  const { isAdmin, products, orders, upsertProduct, deleteProduct, updateOrderStatus } = useStore();
+  const { isAdmin, products, orders, upsertProduct, deleteProduct, refreshProducts, updateOrderStatus } = useStore();
   const [streakEvents, setStreakEvents] = useState<Array<any>>([]);
   const [form, setForm] = useState<EditableProduct>(initialForm);
+  const [productSearch, setProductSearch] = useState("");
+  const [productCategoryFilter, setProductCategoryFilter] = useState<ShopCategoryId | "all">("all");
   const [editingName, setEditingName] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const filteredProducts = useMemo(() => {
+    const normalizedSearch = productSearch.trim().toLowerCase();
+    return products.filter((product) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        product.name.toLowerCase().includes(normalizedSearch) ||
+        product.slug.toLowerCase().includes(normalizedSearch) ||
+        product.shortDescription.toLowerCase().includes(normalizedSearch) ||
+        product.origin.toLowerCase().includes(normalizedSearch) ||
+        product.category.toLowerCase().includes(normalizedSearch);
+
+      const matchesCategory =
+        productCategoryFilter === "all" || product.category === productCategoryFilter;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [productSearch, productCategoryFilter, products]);
 
   const metrics = useMemo(
     () => [
@@ -136,42 +156,25 @@ export function AdminDashboard() {
       inventory: Number(form.inventory)
     };
 
-    // Update local state first for immediate UI feedback
-    upsertProduct({
-      ...productData,
-      id: form.id,
-      compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : undefined,
-      shortDescription: form.shortDescription,
-      origin: form.origin,
-      popularity: Number(form.popularity),
-      bestSellerScore: Number(form.bestSellerScore),
-      badges: form.badges
-    });
-
     try {
       let response;
-      let apiData;
 
       if (form.id) {
-        // Update existing product
         response = await fetch(`/api/products/${form.id}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(productData)
+          body: JSON.stringify({ ...productData, category: form.category })
         });
-        apiData = productData;
       } else {
-        // Create new product
         response = await fetch("/api/products", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(productData)
+          body: JSON.stringify({ ...productData, category: form.category })
         });
-        apiData = productData;
       }
 
       if (!response.ok) {
@@ -184,51 +187,26 @@ export function AdminDashboard() {
       const result = await response.json();
       console.log("Product saved to database successfully", result);
 
-      // If it was a new product, update the local state with the returned ID
-      if (!form.id && result.product?.id) {
-        upsertProduct({
-          ...productData,
-          id: result.product.id,
-          compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : undefined,
-          shortDescription: form.shortDescription,
-          origin: form.origin,
-          popularity: Number(form.popularity),
-          bestSellerScore: Number(form.bestSellerScore),
-          badges: form.badges
-        });
-      }
-
-      // Refresh products list to ensure consistency
-      try {
-        const productsRes = await fetch("/api/products");
-        if (productsRes.ok) {
-          const productsData = await productsRes.json();
-          // Products will be fetched by the store provider automatically
-        }
-      } catch (err) {
-        console.error("Failed to refresh products list:", err);
-      }
+      await refreshProducts();
     } catch (error) {
       console.error("Error saving product:", error);
       alert("Error saving product. Check console for details.");
+      return;
     }
 
     setForm(initialForm);
     setEditingName(null);
+    setEditingId(null);
   }
 
   async function handleDeleteProduct(productId: string) {
     const product = products.find(p => p.id === productId);
     const productName = product?.name || "Product";
-    
+
     if (!window.confirm(`Are you sure you want to delete "${productName}"?`)) {
       return;
     }
 
-    // Delete from local state first
-    deleteProduct(productId);
-
-    // Persist deletion to database
     try {
       const response = await fetch(`/api/products/${productId}`, {
         method: "DELETE",
@@ -240,11 +218,15 @@ export function AdminDashboard() {
       if (!response.ok) {
         const error = await response.json();
         console.error("Failed to delete product from database:", error);
-        alert("Failed to delete product from database. Local deletion was reverted.");
+        alert("Failed to delete product from database. No changes were saved.");
         return;
       }
 
       console.log("Product deleted from database successfully");
+      if (editingId === productId) {
+        resetForm();
+      }
+      await refreshProducts();
     } catch (error) {
       console.error("Error deleting product:", error);
       alert("Error deleting product. Check console for details.");
@@ -611,9 +593,49 @@ export function AdminDashboard() {
               <p className="text-sm text-ink/58">{products.length} total items</p>
             </div>
             <div className="mt-6 space-y-3">
-              {products.map((product) => (
-                <div
-                  key={product.id}
+              <div className="grid gap-4 sm:grid-cols-2 sm:items-end">
+                <div>
+                  <label className="text-sm font-semibold text-ink/70">Search products</label>
+                  <input
+                    value={productSearch}
+                    onChange={(event) => setProductSearch(event.target.value)}
+                    placeholder="Search by name, description, category, or unit"
+                    className="mt-2 w-full rounded-[1.2rem] border border-brand-100 bg-cream px-4 py-3 text-sm outline-none"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2 items-center">
+                  <label className="text-sm font-semibold text-ink/70">Category</label>
+                  <select
+                    value={productCategoryFilter}
+                    onChange={(event) => setProductCategoryFilter(event.target.value as ShopCategoryId | "all")}
+                    className="rounded-[1.2rem] border border-brand-100 bg-cream px-4 py-3 text-sm outline-none"
+                  >
+                    <option value="all">All categories</option>
+                    {shopCategories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.title}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="rounded-full bg-brand-600 px-4 py-3 text-sm font-semibold text-white"
+                  >
+                    New product
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 space-y-3">
+              {filteredProducts.length === 0 ? (
+                <div className="rounded-[1.5rem] border border-dashed border-brand-200 bg-brand-50 p-6 text-center text-sm text-ink/70">
+                  No products match this search or category filter. Try another search term or remove the filter.
+                </div>
+              ) : (
+                filteredProducts.map((product) => (
+                  <div
+                    key={product.id}
                   data-product-id={product.id}
                   className={cn(
                     "flex flex-col gap-3 rounded-[1.5rem] bg-cream p-4 sm:flex-row sm:items-center sm:justify-between",

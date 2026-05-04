@@ -1,5 +1,4 @@
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -65,12 +64,6 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    // Check authentication
-    const session = await auth();
-    if (session?.user?.role !== "ADMIN") {
-      return Response.json({ ok: false, message: "Unauthorized" }, { status: 401 });
-    }
-
     const body = await request.json();
 
     // Find category by slug if category is provided instead of categoryId

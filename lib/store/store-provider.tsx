@@ -98,6 +98,7 @@ type StoreContextValue = {
   reorderOrder: (orderId: string) => void;
   upsertProduct: (input: ProductInput) => void;
   deleteProduct: (productId: string) => void;
+  refreshProducts: () => Promise<void>;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
 };
 
@@ -309,6 +310,37 @@ function normalizeDbOrder(order: any): StoreOrder {
   };
 }
 
+function normalizeDbProduct(dbProduct: any): ShopProduct {
+  return {
+    id: dbProduct.id,
+    slug: dbProduct.slug,
+    sku: `FHM-${dbProduct.id.slice(-6).toUpperCase()}`,
+    category: dbProduct.category?.slug || "vegetables",
+    name: dbProduct.name,
+    unit: dbProduct.unit,
+    price: Number(dbProduct.price),
+    compareAtPrice: dbProduct.salePrice ? Number(dbProduct.salePrice) : undefined,
+    popularity: 80,
+    bestSellerScore: 80,
+    createdAt: dbProduct.createdAt ? new Date(dbProduct.createdAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+    image: dbProduct.image,
+    badges: dbProduct.featured ? ["Fresh"] : [],
+    shortDescription: dbProduct.description?.slice(0, 100) || "",
+    description: dbProduct.description || "",
+    origin: "Local",
+    inventory: dbProduct.inventory,
+    highlights: [dbProduct.category?.name || "Fresh", `${dbProduct.inventory} in stock`]
+  };
+}
+
+async function fetchProductsFromApi(): Promise<ShopProduct[]> {
+  const response = await fetch("/api/products");
+  if (!response.ok) return [];
+  const data = await response.json();
+  if (!Array.isArray(data.products)) return [];
+  return data.products.map(normalizeDbProduct);
+}
+
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   // Start with server-identical baseState to avoid hydration mismatches.
   const [state, setState] = useState<PersistedState>(baseState);
@@ -331,6 +363,27 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Fetch products from database API to ensure prices are up-to-date
+  async function refreshProducts() {
+    try {
+      const dbProducts = await fetchProductsFromApi();
+      if (dbProducts.length === 0) return;
+
+      setState((current) => ({
+        ...current,
+        products: dbProducts,
+        orders: current.orders.map((order) => ({
+          ...order,
+          items: order.items.map((item) => {
+            const updated = dbProducts.find((p: ShopProduct) => p.id === item.productId);
+            return updated ? { ...item, image: updated.image, price: updated.price } : item;
+          })
+        }))
+      }));
+    } catch (err) {
+      console.warn("Failed to refresh products from API:", err);
+    }
+  }
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -338,51 +391,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     (async function syncProducts() {
       try {
-        const response = await fetch("/api/products");
-        if (!response.ok) return;
+        const dbProducts = await fetchProductsFromApi();
+        if (!mounted || dbProducts.length === 0) return;
 
-        const data = await response.json();
-        if (!mounted || !Array.isArray(data.products)) return;
-
-        // Convert database products to ShopProduct format
-        const dbProducts = data.products.map((dbProduct: any) => ({
-          id: dbProduct.id,
-          slug: dbProduct.slug,
-          sku: `FHM-${dbProduct.id.slice(-6).toUpperCase()}`,
-          category: dbProduct.category?.slug || "vegetables", // Map category slug
-          name: dbProduct.name,
-          unit: dbProduct.unit,
-          price: Number(dbProduct.price),
-          compareAtPrice: dbProduct.salePrice ? Number(dbProduct.salePrice) : undefined,
-          popularity: 80, // Default values for fields not in DB
-          bestSellerScore: 80,
-          createdAt: dbProduct.createdAt || new Date().toISOString().slice(0, 10),
-          image: dbProduct.image,
-          badges: dbProduct.featured ? ["Fresh"] : [],
-          shortDescription: dbProduct.description?.slice(0, 100) || "",
-          description: dbProduct.description || "",
-          origin: "Local", // Default
-          inventory: dbProduct.inventory,
-          highlights: [dbProduct.category?.name || "Fresh", `${dbProduct.inventory} in stock`]
+        setState((current) => ({
+          ...current,
+          products: dbProducts,
+          orders: current.orders.map((order) => ({
+            ...order,
+            items: order.items.map((item) => {
+              const updated = dbProducts.find((p: ShopProduct) => p.id === item.productId);
+              return updated ? { ...item, image: updated.image, price: updated.price } : item;
+            })
+          }))
         }));
-
-        setState((current) => {
-          // Update order items with latest product prices
-          return {
-            ...current,
-            products: dbProducts,
-            orders: current.orders.map(order => ({
-              ...order,
-              items: order.items.map(item => {
-                const updated = dbProducts.find((p: ShopProduct) => p.id === item.productId);
-                return updated ? { ...item, image: updated.image, price: updated.price } : item;
-              })
-            }))
-          };
-        });
       } catch (err) {
         console.warn("Failed to sync products from API:", err);
-        // Fall back to existing products - no error thrown
       }
     })();
 
@@ -878,7 +902,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       reorderOrder,
       upsertProduct,
       deleteProduct,
-      updateOrderStatus
+refreshProducts,
+    updateOrderStatus
     }),
     [state]
   );

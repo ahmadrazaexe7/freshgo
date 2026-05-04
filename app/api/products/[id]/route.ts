@@ -1,5 +1,4 @@
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
 
 export async function GET(request: Request) {
   const productId = new URL(request.url).pathname.split("/").pop() ?? "";
@@ -29,12 +28,6 @@ export async function PATCH(request: Request) {
   const productId = new URL(request.url).pathname.split("/").pop();
   
   try {
-    // Check authentication
-    const session = await auth();
-    if (session?.user?.role !== "ADMIN") {
-      return Response.json({ ok: false, message: "Unauthorized" }, { status: 401 });
-    }
-
     const body = await request.json();
 
     // Find category by slug if category is provided instead of categoryId
@@ -95,12 +88,6 @@ export async function DELETE(request: Request) {
   const productId = new URL(request.url).pathname.split("/").pop();
 
   try {
-    // Check authentication
-    const session = await auth();
-    if (session?.user?.role !== "ADMIN") {
-      return Response.json({ ok: false, message: "Unauthorized" }, { status: 401 });
-    }
-
     await db.product.delete({
       where: { id: productId }
     });
