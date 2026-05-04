@@ -263,14 +263,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     const parsed = safeParseState(window.localStorage.getItem(storageKey));
     if (parsed) {
-      // Always use the latest shopProducts (with merged rates), but preserve user data
+      // Preserve user-edited products from localStorage, but update order items with latest product data
+      // Merge static shopProducts with user-edited/custom products from localStorage
+      const staticProductIds = new Set(shopProducts.map(p => p.id));
+      const customProducts = parsed.products.filter(p => !staticProductIds.has(p.id));
+      const mergedProducts = [...shopProducts, ...customProducts];
+
+      // For each product, check if there's a user-edited version in localStorage
+      const finalProducts = mergedProducts.map(merged => {
+        const edited = parsed.products.find(p => p.id === merged.id);
+        return edited || merged;
+      });
+
       setState({
         ...parsed,
-        products: shopProducts,
+        products: finalProducts,
         orders: parsed.orders.map(order => ({
           ...order,
           items: order.items.map(item => {
-            const updated = shopProducts.find(p => p.id === item.productId);
+            const updated = finalProducts.find(p => p.id === item.productId);
             return updated ? { ...item, image: updated.image, price: updated.price } : item;
           })
         }))
