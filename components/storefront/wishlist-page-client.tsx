@@ -42,7 +42,7 @@ export function WishlistPageClient() {
         Keep your regular essentials and favorite seasonal picks together for faster repeat orders.
       </p>
 
-      <div className="mt-6 sm:mt-8 grid gap-3 sm:gap-4 lg:gap-5 grid-cols-2 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-6 sm:mt-8 grid gap-3 sm:gap-4 lg:gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
         {wishlistProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

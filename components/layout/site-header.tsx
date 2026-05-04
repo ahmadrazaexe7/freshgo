@@ -5,10 +5,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart,
+  Menu,
   Search,
   ShoppingCart,
   Truck,
   User2,
+  X,
 } from "lucide-react";
 
 import { mainNav } from "@/data/navigation";
@@ -20,13 +22,18 @@ import { useStreak } from "./use-streak";
 
 export function SiteHeader() {
   const MotionHeader = motion.header as any;
-  const { cartCount, wishlistCount, user, products } = useStore();
+  const { cart, cartCount, wishlistCount, user, products } = useStore();
+  const cartTotal = products.reduce((sum, product) => {
+    const item = cart.find((entry) => entry.productId === product.id);
+    return sum + (item ? product.price * item.quantity : 0);
+  }, 0);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const [search, setSearch] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [streakOpen, setStreakOpen] = useState(false);
 
@@ -133,6 +140,15 @@ export function SiteHeader() {
 
         {/* Actions */}
         <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 ml-auto lg:ml-0">
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 p-2 text-white/80 hover:text-white hover:bg-white/10 lg:hidden"
+            aria-label="Open menu"
+          >
+            <Menu className="h-4 w-4" />
+          </button>
+
           <Link
             href={accountHref}
             className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 text-white/80 hover:text-white transition-colors text-xs sm:text-sm font-medium rounded-lg hover:bg-white/5"
@@ -155,13 +171,103 @@ export function SiteHeader() {
             className="flex items-center gap-1.5 sm:gap-2.5 bg-white/10 hover:bg-white/20 border border-white/10 px-2.5 sm:px-5 py-1.5 sm:py-2.5 rounded-full text-white font-bold text-xs sm:text-sm transition-all active:scale-95"
           >
             <ShoppingCart className="h-3.5 sm:h-4.5 w-3.5 sm:w-4.5 flex-shrink-0" />
-            <span className="hidden sm:inline">{formatPrice(340)}</span>
+            <span className="hidden sm:inline">{cartCount > 0 ? formatPrice(cartTotal) : "Cart"}</span>
             {mounted && cartCount > 0 && (
               <span className="bg-[#D1B06B] text-[#081D18] px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[10px] rounded-full">{cartCount}</span>
             )}
           </Link>
         </div>
       </div>
+
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ y: -16, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -16, opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="h-full overflow-y-auto px-4 py-5 sm:px-6"
+            >
+              <div className="flex items-center justify-between">
+                <Link href="/" className="flex items-center gap-3 text-white">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-white">
+                    🥬
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/75">FreshGo</p>
+                    <p className="text-xs text-white/60">Nature Delivered</p>
+                  </div>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white hover:bg-white/10"
+                  aria-label="Close menu"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSearchSubmit} className="mt-6">
+                <label className="sr-only" htmlFor="mobile-search">Search products</label>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
+                  <input
+                    id="mobile-search"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-12 pr-4 text-sm text-white placeholder:text-white/40 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                    placeholder="Search fresh groceries"
+                  />
+                </div>
+              </form>
+
+              <nav className="mt-8 space-y-3">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-base font-semibold text-white transition hover:bg-white/10"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="mt-8 border-t border-white/10 pt-6 space-y-3 text-sm text-white/80">
+                <Link
+                  href="/wishlist"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block rounded-2xl bg-white/5 px-4 py-3 text-white transition hover:bg-white/10"
+                >
+                  View wishlist
+                </Link>
+                <Link
+                  href="/cart"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block rounded-2xl bg-white/5 px-4 py-3 text-white transition hover:bg-white/10"
+                >
+                  View cart ({cartCount})
+                </Link>
+                <Link
+                  href="/contact"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block rounded-2xl bg-white/5 px-4 py-3 text-white transition hover:bg-white/10"
+                >
+                  Contact support
+                </Link>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <StreakModal open={streakOpen} onClose={() => setStreakOpen(false)} />
     </MotionHeader>

@@ -163,7 +163,19 @@ export function AdminDashboard() {
           return;
         }
 
-        console.log("Product saved to database successfully");
+        const result = await response.json();
+        console.log("Product saved to database successfully", result);
+
+        // Refresh products list to ensure consistency
+        try {
+          const productsRes = await fetch("/api/products");
+          if (productsRes.ok) {
+            const productsData = await productsRes.json();
+            // Products will be fetched by the store provider automatically
+          }
+        } catch (err) {
+          console.error("Failed to refresh products list:", err);
+        }
       } catch (error) {
         console.error("Error saving product:", error);
         alert("Error saving product. Check console for details.");

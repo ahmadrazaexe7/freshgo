@@ -78,19 +78,21 @@ export function CartPageClient() {
                     <button
                       type="button"
                       onClick={() => updateCartQuantity(product.id, quantity - 1)}
-                      className="inline-flex h-7 sm:h-9 w-7 sm:w-9 items-center justify-center rounded-full text-ink text-xs sm:text-base"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink hover:bg-brand-100 transition-colors"
+                      aria-label="Decrease quantity"
                     >
-                      <Minus className="h-3 sm:h-4 w-3 sm:w-4" />
+                      <Minus className="h-4 w-4" />
                     </button>
-                    <span className="inline-flex min-w-7 sm:min-w-10 items-center justify-center text-xs sm:text-sm font-semibold text-ink">
+                    <span className="inline-flex min-w-12 items-center justify-center text-sm font-semibold text-ink">
                       {quantity}
                     </span>
                     <button
                       type="button"
                       onClick={() => updateCartQuantity(product.id, quantity + 1)}
-                      className="inline-flex h-7 sm:h-9 w-7 sm:w-9 items-center justify-center rounded-full text-ink text-xs sm:text-base"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full text-ink hover:bg-brand-100 transition-colors"
+                      aria-label="Increase quantity"
                     >
-                      <Plus className="h-3 sm:h-4 w-3 sm:w-4" />
+                      <Plus className="h-4 w-4" />
                     </button>
                   </div>
                   <div className="text-right">

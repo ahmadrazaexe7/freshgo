@@ -83,7 +83,7 @@ export function ProductDetailView({ slug }: { slug: string }) {
           </div>
 
           <div className="overflow-hidden rounded-[2.2rem] bg-white shadow-soft">
-            <div className="relative aspect-[16/12] overflow-hidden">
+            <div className="relative aspect-square sm:aspect-[16/12] overflow-hidden">
               {product.image ? (
                 <Image
                   src={product.image}
@@ -91,7 +91,7 @@ export function ProductDetailView({ slug }: { slug: string }) {
                   fill
                   priority
                   className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 55vw"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 55vw"
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-400" />

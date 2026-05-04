@@ -227,8 +227,8 @@ export function SiteFooter() {
           </motion.p>
           <div className="flex items-center gap-6">
             {[
-              { label: 'Privacy', href: '#' },
-              { label: 'Terms', href: '#' },
+              { label: 'Privacy', href: '/contact' },
+              { label: 'Terms', href: '/contact' },
               { label: 'Contact', href: '/contact' },
             ].map((item, idx) => (
               <motion.div

@@ -82,6 +82,7 @@ type StoreContextValue = {
   orders: StoreOrder[];
   user: SessionUser | null;
   lastAction: string | null;
+  orderError: string | null;
   cartCount: number;
   wishlistCount: number;
   isAdmin: boolean;
@@ -107,6 +108,7 @@ type PersistedState = {
   orders: StoreOrder[];
   user: SessionUser | null;
   lastAction?: string | null;
+  orderError?: string | null;
   accounts?: Array<{ email: string; password: string; name: string; role: UserRole }>;
 };
 
@@ -218,8 +220,9 @@ const baseState: PersistedState = {
   cart: [],
   wishlist: [],
   orders: buildDemoOrders(),
-  user: null
-  ,
+  user: null,
+  lastAction: null,
+  orderError: null,
   accounts: demoUsers
 };
 
@@ -291,6 +294,53 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       window.localStorage.removeItem(storageKey);
     }
   }, []);
+
+  // Fetch products from database API to ensure prices are up-to-date
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let mounted = true;
+
+    (async function syncProducts() {
+      try {
+        const response = await fetch("/api/products");
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (!mounted || !Array.isArray(data.products)) return;
+
+        // Merge fetched products with custom products from localStorage
+        const fetchedProducts = data.products as ShopProduct[];
+        
+        setState((current) => {
+          const staticProductIds = new Set(fetchedProducts.map((p) => p.id));
+          const customProducts = current.products.filter((p) => !staticProductIds.has(p.id));
+          const mergedProducts = [...fetchedProducts, ...customProducts];
+
+          // Update order items with latest product prices
+          return {
+            ...current,
+            products: mergedProducts,
+            orders: current.orders.map(order => ({
+              ...order,
+              items: order.items.map(item => {
+                const updated = mergedProducts.find(p => p.id === item.productId);
+                return updated ? { ...item, image: updated.image, price: updated.price } : item;
+              })
+            }))
+          };
+        });
+      } catch (err) {
+        console.warn("Failed to sync products from API:", err);
+        // Fall back to existing products - no error thrown
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const stateRef = useRef(state);
 
   useEffect(() => {
@@ -328,6 +378,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       return {
         ...current,
         lastAction: product ? `${product.name} added to cart` : "Item added to cart",
+        orderError: null,
         cart: existing
           ? current.cart.map((item) =>
               item.productId === productId
@@ -342,6 +393,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   function updateCartQuantity(productId: string, quantity: number) {
     setState((current) => ({
       ...current,
+      orderError: null,
       cart:
         quantity <= 0
           ? current.cart.filter((item) => item.productId !== productId)
@@ -357,6 +409,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setState((current) => ({
       ...current,
       lastAction: product ? `${product.name} removed from cart` : "Item removed from cart",
+      orderError: null,
       cart: current.cart.filter((item) => item.productId !== productId)
     }));
   }
@@ -364,6 +417,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   function clearCart() {
     setState((current) => ({
       ...current,
+      orderError: null,
       cart: []
     }));
   }
@@ -434,6 +488,28 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   function placeOrder(input: CheckoutInput) {
     const current = stateRef.current;
+    
+    // Validate inventory for all items
+    const inventoryErrors: string[] = [];
+    for (const cartItem of current.cart) {
+      const product = current.products.find((entry) => entry.id === cartItem.productId);
+      if (!product) {
+        inventoryErrors.push(`Product no longer available`);
+      } else if (cartItem.quantity > product.inventory) {
+        inventoryErrors.push(`Only ${product.inventory} ${product.unit} of "${product.name}" available`);
+      }
+    }
+
+    if (inventoryErrors.length > 0) {
+      const errorMessage = inventoryErrors.join(" • ");
+      setState((current) => ({
+        ...current,
+        lastAction: errorMessage,
+        orderError: errorMessage
+      }));
+      return null;
+    }
+
     const items = current.cart
       .map((item) => {
         const product = current.products.find((entry) => entry.id === item.productId);
@@ -539,6 +615,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       ...existing,
       cart: [],
       lastAction: `Order ${order.id} placed successfully — ${streakMessage}`,
+      orderError: null,
       orders: [order, ...existing.orders],
       user:
         existing.user ??
@@ -643,6 +720,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       orders: state.orders,
       user: state.user,
       lastAction: state.lastAction ?? null,
+      orderError: state.orderError ?? null,
       cartCount: state.cart.reduce((sum, item) => sum + item.quantity, 0),
       wishlistCount: state.wishlist.length,
       isAdmin: state.user?.role === "ADMIN",

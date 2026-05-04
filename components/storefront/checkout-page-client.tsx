@@ -10,7 +10,7 @@ import { buildWhatsAppOrderUrl, formatPrice, getDeliveryFee } from "@/lib/storef
 const cityOptions = ["Rawalpindi", "Islamabad"] as const;
 
 export function CheckoutPageClient() {
-  const { cart, products, placeOrder, user } = useStore();
+  const { cart, products, placeOrder, user, orderError } = useStore();
   const [form, setForm] = useState({
     fullName: user?.name ?? "",
     email: user?.email ?? "",
@@ -36,6 +36,8 @@ export function CheckoutPageClient() {
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const deliveryFee = getDeliveryFee(form.city, subtotal);
   const total = subtotal + deliveryFee;
+
+  const hasOrderError = Boolean(orderError && !submittedOrderId);
 
   if (items.length === 0 && !submittedOrderId) {
     return (
@@ -112,13 +114,18 @@ export function CheckoutPageClient() {
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <form onSubmit={handleSubmit} className="rounded-[2rem] bg-white p-5 shadow-soft sm:p-6">
+          {hasOrderError ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800 mb-4">
+              {orderError}
+            </div>
+          ) : null}
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-700">Checkout</p>
           <h1 className="mt-2 font-display text-4xl text-ink">Confirm your delivery details</h1>
           <p className="mt-3 text-base leading-7 text-ink/66">
             Cash on delivery is enabled by default. Fill in your address and we&apos;ll generate the order instantly.
           </p>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <div className="mt-8 grid gap-4 grid-cols-1 md:grid-cols-2">
             <label className="space-y-2">
               <span className="text-sm font-medium text-ink">Full name</span>
               <input

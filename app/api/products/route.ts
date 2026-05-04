@@ -100,9 +100,3 @@ export async function POST(request: Request) {
     return Response.json({ ok: false, message: "Failed to create product" }, { status: 500 });
   }
 }
-        ...body
-      }
-    },
-    { status: 201 }
-  );
-}
