@@ -1520,7 +1520,7 @@ export const shopCategories: ShopCategory[] = [
     popularity: 62,
     bestSellerScore: 55,
     createdAt: "2026-04-20",
-    image: "https://images.unsplash.com/photo-1590301157890-4810ed3521df?auto=format&fit=crop&w=900&q=80",
+    image: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=900&q=80",
     badges: ["Fresh"],
     shortDescription: "Fresh green beans for sabzi and stir-fries.",
     description: "Tender fresh beans perfect for stir-fries and light curries.",
@@ -1539,7 +1539,7 @@ export const shopCategories: ShopCategory[] = [
     popularity: 58,
     bestSellerScore: 52,
     createdAt: "2026-04-19",
-    image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=900&q=80",
+    image: "https://images.unsplash.com/photo-1590301157890-4810ed3521df?auto=format&fit=crop&w=900&q=80",
     badges: ["Fresh"],
     shortDescription: "Ridge gourd for light everyday curries.",
     description: "Tender ridge gourd (tenda) ideal for light sabzi and dal.",
@@ -1558,7 +1558,7 @@ export const shopCategories: ShopCategory[] = [
     popularity: 54,
     bestSellerScore: 48,
     createdAt: "2026-04-18",
-    image: "https://images.unsplash.com/photo-1596560548464-f020f3b9ec8f?auto=format&fit=crop&w=900&q=80",
+    image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=900&q=80",
     badges: ["Fresh"],
     shortDescription: "Local root vegetable for traditional dishes.",
     description: "Traditional maroo root vegetable for slow-cooked curries.",
@@ -1599,7 +1599,7 @@ export const shopCategories: ShopCategory[] = [
     popularity: 82,
     bestSellerScore: 77,
     createdAt: "2026-04-16",
-    image: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?auto=format&fit=crop&w=900&q=80",
+    image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=900&q=80",
     badges: ["Fresh"],
     shortDescription: "Golden apples — mild and juicy.",
     description: "Golden delicious apples with a mild, sweet flavor and juicy texture.",
@@ -1618,7 +1618,7 @@ export const shopCategories: ShopCategory[] = [
     popularity: 78,
     bestSellerScore: 73,
     createdAt: "2026-04-15",
-    image: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?auto=format&fit=crop&w=900&q=80",
+    image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=900&q=80",
     badges: ["Fresh"],
     shortDescription: "White apples — affordable everyday choice.",
     description: "Budget-friendly white apples perfect for daily snacking and juicing.",
@@ -1637,7 +1637,7 @@ export const shopCategories: ShopCategory[] = [
     popularity: 80,
     bestSellerScore: 75,
     createdAt: "2026-04-19",
-    image: "https://images.unsplash.com/photo-1571575173700-afb9492e6a50?auto=format&fit=crop&w=900&q=80",
+    image: "https://images.unsplash.com/photo-1516684792274-3142o9928323?auto=format&fit=crop&w=900&q=80",
     badges: ["Fresh"],
     shortDescription: "Sweet cantaloupe — summer refreshment.",
     description: "Fragrant cantaloupe melon with orange flesh and sweet flavor.",
@@ -1656,7 +1656,7 @@ export const shopCategories: ShopCategory[] = [
     popularity: 76,
     bestSellerScore: 71,
     createdAt: "2026-04-18",
-    image: "https://images.unsplash.com/photo-1571575173700-afb9492e6a50?auto=format&fit=crop&w=900&q=80",
+    image: "https://images.unsplash.com/photo-1516684792274-3142o9928323?auto=format&fit=crop&w=900&q=80",
     badges: ["Fresh"],
     shortDescription: "Yellow melon — light and refreshing.",
     description: "Pale yellow melon with delicate sweetness and high water content.",
@@ -1675,7 +1675,7 @@ export const shopCategories: ShopCategory[] = [
     popularity: 83,
     bestSellerScore: 78,
     createdAt: "2026-04-20",
-    image: "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?auto=format&fit=crop&w=900&q=80",
+    image: "https://images.unsplash.com/photo-1587049352850-3d80e45c5b18?auto=format&fit=crop&w=900&q=80",
     badges: ["Fresh"],
     shortDescription: "Classic sharbooza — the king of melons.",
     description: "Traditional sharbooza melon with intense sweetness and green flesh.",
@@ -2553,26 +2553,26 @@ export const shopCategories: ShopCategory[] = [
   }
 ];
 
-// Image mapping for products merged from product-rates
+// Image mapping for products merged from product-rates (kept for reference)
 const productRateImages: Record<string, string> = {
   // Vegetables
-  "veg-fresh-bean": "https://images.unsplash.com/photo-1590301157890-4810ed3521df?auto=format&fit=crop&w=900&q=80",
-  "veg-tenda": "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=900&q=80",
-  "veg-maroo": "https://images.unsplash.com/photo-1596560548464-f020f3b9ec8f?auto=format&fit=crop&w=900&q=80",
+  "veg-fresh-bean": "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=900&q=80",
+  "veg-tenda": "https://images.unsplash.com/photo-1590301157890-4810ed3521df?auto=format&fit=crop&w=900&q=80",
+  "veg-maroo": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=900&q=80",
   "veg-yam": "https://images.unsplash.com/photo-1596097635121-14b63b7a0c19?auto=format&fit=crop&w=900&q=80",
   "veg-lettuce": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=900&q=80",
   "veg-green-onion": "https://images.unsplash.com/photo-1511280353039-4d662193630d?auto=format&fit=crop&w=900&q=80",
   "veg-iceberg": "https://images.unsplash.com/photo-1594282486556-851d21c0086b?auto=format&fit=crop&w=900&q=80",
   "veg-lemon": "https://images.unsplash.com/photo-1582476000940-96764b7b6c5a?auto=format&fit=crop&w=900&q=80",
-  
+
   // Fruits
   "fruit-apple-kala-kulu": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=900&q=80",
-  "fruit-apple-golden": "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?auto=format&fit=crop&w=900&q=80",
-  "fruit-apple-white": "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?auto=format&fit=crop&w=900&q=80",
-  "fruit-cantaloupe": "https://images.unsplash.com/photo-1571575173700-afb9492e6a50?auto=format&fit=crop&w=900&q=80",
-  "fruit-yellow-melon": "https://images.unsplash.com/photo-1571575173700-afb9492e6a50?auto=format&fit=crop&w=900&q=80",
-  "fruit-sharbooza": "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?auto=format&fit=crop&w=900&q=80",
-  
+  "fruit-apple-golden": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=900&q=80",
+  "fruit-apple-white": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=900&q=80",
+  "fruit-cantaloupe": "https://images.unsplash.com/photo-1516684792274-3142o9928323?auto=format&fit=crop&w=900&q=80",
+  "fruit-yellow-melon": "https://images.unsplash.com/photo-1516684792274-3142o9928323?auto=format&fit=crop&w=900&q=80",
+  "fruit-sharbooza": "https://images.unsplash.com/photo-1587049352850-3d80e45c5b18?auto=format&fit=crop&w=900&q=80",
+
   // Grains/Pulses
   "grain-sabut-mong": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",
   "grain-mong": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",

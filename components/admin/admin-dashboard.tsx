@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Package, ShoppingBag, Sparkles, Users } from "lucide-react";
+import { Package, ShoppingBag, Sparkles, Users, Upload, Image as ImageIcon, X } from "lucide-react";
 
 import { shopCategories, type ShopCategoryId, type ShopProduct } from "@/data/shop-catalog";
 import { useStore } from "@/lib/store/store-provider";
@@ -50,6 +50,10 @@ export function AdminDashboard() {
   const [form, setForm] = useState<EditableProduct>(initialForm);
   const [editingName, setEditingName] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const metrics = useMemo(
     () => [
@@ -162,6 +166,7 @@ export function AdminDashboard() {
       badges: product.badges
       });
 
+      setImagePreview(product.image || "");
       setEditingName(product.name);
       setEditingId(product.id);
       // developer console hint
@@ -189,6 +194,67 @@ export function AdminDashboard() {
         ? current.badges.filter((item) => item !== badge)
         : [...current.badges, badge]
     }));
+  }
+
+  function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file.");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be less than 5MB.");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    // Read the file and convert to base64 for demo purposes
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      // Simulate upload progress
+      const interval = setInterval(() => {
+        setUploadProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setIsUploading(false);
+            return 100;
+          }
+          return prev + 20;
+        });
+      }, 100);
+
+      setImagePreview(result);
+      setForm((current) => ({ ...current, image: result }));
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleRemoveImage() {
+    setImagePreview("");
+    setForm((current) => ({ ...current, image: "" }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
+
+  function resetForm() {
+    setForm(initialForm);
+    setImagePreview("");
+    setEditingName(null);
+    setEditingId(null);
+    setIsUploading(false);
+    setUploadProgress(0);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }
 
   return (
@@ -287,12 +353,67 @@ export function AdminDashboard() {
                 className="rounded-[1.2rem] border border-brand-100 bg-cream px-4 py-3 text-sm outline-none"
               />
             </div>
+            {/* Image Upload Section */}
+            <div className="rounded-[1.2rem] border border-brand-100 bg-cream p-4">
+              <label className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-700">Product Image</label>
+              <div className="mt-3 flex items-center gap-4">
+                {imagePreview ? (
+                  <div className="relative h-24 w-24 overflow-hidden rounded-xl bg-white shadow-sm">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="h-full w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute right-1 top-1 rounded-full bg-rose-500 p-1 text-white hover:bg-rose-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex h-24 w-24 items-center justify-center rounded-xl bg-white shadow-sm">
+                    <ImageIcon className="h-8 w-8 text-ink/30" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={isUploading}
+                    className="hidden"
+                    id="image-upload"
+                  />
+                  <label
+                    htmlFor="image-upload"
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+                  >
+                    <Upload className="h-4 w-4" />
+                    {isUploading ? "Uploading..." : "Upload Image"}
+                  </label>
+                  <p className="mt-2 text-xs text-ink/50">PNG, JPG up to 5MB</p>
+                  {isUploading && (
+                    <div className="mt-2 h-1.5 w-full rounded-full bg-brand-100">
+                      <div
+                        className="h-full rounded-full bg-brand-600 transition-all"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
             <input
               value={form.image}
-              onChange={(event) => setForm((current) => ({ ...current, image: event.target.value }))}
-              placeholder="Image URL"
+              onChange={(event) => {
+                setForm((current) => ({ ...current, image: event.target.value }));
+                setImagePreview(event.target.value);
+              }}
+              placeholder="Or paste image URL"
               className="rounded-[1.2rem] border border-brand-100 bg-cream px-4 py-3 text-sm outline-none"
-              required
             />
             <input
               value={form.origin}
@@ -355,12 +476,23 @@ export function AdminDashboard() {
               ))}
             </div>
 
-            <button
-              type="submit"
-              className="inline-flex items-center justify-center rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-soft"
-            >
-              {form.id ? "Update product" : "Create product"}
-            </button>
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-soft hover:bg-brand-700"
+              >
+                {form.id ? "Update product" : "Create product"}
+              </button>
+              {form.id && (
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="rounded-full border border-brand-200 bg-white px-5 py-3 text-sm font-semibold text-ink hover:bg-brand-50"
+                >
+                  Cancel Edit
+                </button>
+              )}
+            </div>
           </div>
         </form>
 
