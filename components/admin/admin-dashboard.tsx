@@ -665,7 +665,7 @@ export function AdminDashboard() {
                     </button>
                   </div>
                 </div>
-              ))}
+              )))}
             </div>
           </div>
 
