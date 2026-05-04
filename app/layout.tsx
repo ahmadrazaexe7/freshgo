@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
-
+// @ts-ignore: allow side-effect CSS import when type declarations are unavailable
 import "./globals.css";
 import { AppProviders } from "@/providers/app-providers";
+import { Analytics } from '@vercel/analytics/react';
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function RootLayout({
         </a>
         <AppProviders>
           <div id="content">{children}</div>
+          <Analytics />
         </AppProviders>
       </body>
     </html>
