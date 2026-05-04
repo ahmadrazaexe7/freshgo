@@ -17,7 +17,7 @@ type EditableProduct = {
   unit: string;
   price: string;
   compareAtPrice: string;
-  image: string;
+  image?: string;
   shortDescription: string;
   description: string;
   origin: string;

@@ -22,7 +22,7 @@ export type ShopProduct = {
   popularity: number;
   bestSellerScore: number;
   createdAt: string;
-  image: string;
+  image?: string;
   badges: ProductBadge[];
   shortDescription: string;
   description: string;
@@ -30,6 +30,8 @@ export type ShopProduct = {
   inventory: number;
   highlights: string[];
 };
+
+import productRates from "./product-rates";
 
 export const shopCategories: ShopCategory[] = [
   {
@@ -52,7 +54,7 @@ export const shopCategories: ShopCategory[] = [
   }
 ];
 
-  export const shopProducts: ShopProduct[] = [
+  const baseShopProducts: ShopProduct[] = [
   // ─── VEGETABLES (40 items) ────────────────────────────────────────────────
   {
     id: "veg-spinach",
@@ -81,7 +83,7 @@ export const shopCategories: ShopCategory[] = [
     category: "vegetables",
     name: "Tomatoes (Timatar)",
     unit: "1 kg",
-    price: 260,
+    price: 89,
     popularity: 95,
     bestSellerScore: 90,
     createdAt: "2026-04-18",
@@ -100,7 +102,7 @@ export const shopCategories: ShopCategory[] = [
     category: "vegetables",
     name: "Premium Potatoes (Alu)",
     unit: "1 kg",
-    price: 230,
+    price: 65,
     popularity: 89,
     bestSellerScore: 85,
     createdAt: "2026-04-14",
@@ -138,8 +140,8 @@ export const shopCategories: ShopCategory[] = [
     sku: "FHM-VEG-005",
     category: "vegetables",
     name: "Red Onions (Piyaz)",
-    unit: "2 kg",
-    price: 200,
+    unit: "1 kg",
+    price: 139,
     popularity: 96,
     bestSellerScore: 93,
     createdAt: "2026-04-10",
@@ -158,7 +160,7 @@ export const shopCategories: ShopCategory[] = [
     category: "vegetables",
     name: "Fresh Garlic (Lehsan)",
     unit: "250 g",
-    price: 150,
+    price: 159,
     compareAtPrice: 180,
     popularity: 91,
     bestSellerScore: 88,
@@ -167,7 +169,7 @@ export const shopCategories: ShopCategory[] = [
     badges: ["Fresh", "Discount"],
     shortDescription: "Plump garlic cloves for everyday cooking.",
     description: "Pungent, full-flavored garlic heads for curries, stir-fries, and marinades.",
-    origin: "Punjab farms",
+    origin: "China",
     inventory: 80,
     highlights: ["Intense flavor", "Fresh heads", "Kitchen essential"]
   },
@@ -178,7 +180,7 @@ export const shopCategories: ShopCategory[] = [
     category: "vegetables",
     name: "Fresh Ginger (Adrak)",
     unit: "250 g",
-    price: 140,
+    price: 109,
     popularity: 88,
     bestSellerScore: 82,
     createdAt: "2026-04-15",
@@ -196,8 +198,8 @@ export const shopCategories: ShopCategory[] = [
     sku: "FHM-VEG-008",
     category: "vegetables",
     name: "Fresh Cucumbers (Kheera)",
-    unit: "500 g",
-    price: 120,
+    unit: "1 kg",
+    price: 79,
     popularity: 80,
     bestSellerScore: 75,
     createdAt: "2026-04-22",
@@ -370,8 +372,8 @@ export const shopCategories: ShopCategory[] = [
     sku: "FHM-VEG-017",
     category: "vegetables",
     name: "Lady Finger (Bhindi)",
-    unit: "500 g",
-    price: 145,
+    unit: "1 kg",
+    price: 116,
     popularity: 79,
     bestSellerScore: 73,
     createdAt: "2026-04-18",
@@ -871,14 +873,15 @@ export const shopCategories: ShopCategory[] = [
     slug: "farm-bananas",
     sku: "FHM-FRT-003",
     category: "fruits",
-    name: "Farm Bananas (Kela)",
-    unit: "dozen",
-    price: 320,
+    name: "Banana (Small)",
+    unit: "half doz",
+    price: 189,
+    compareAtPrice: 320,
     popularity: 87,
     bestSellerScore: 84,
     createdAt: "2026-04-17",
     image: "https://images.unsplash.com/photo-1603833665858-e61d17a86224?auto=format&fit=crop&w=900&q=80",
-    badges: ["Fresh"],
+    badges: ["Fresh", "Discount"],
     shortDescription: "Everyday bananas — breakfast and smoothies.",
     description: "Reliable, ripe bananas for breakfast, baking, and snacks.",
     origin: "Sindh fruit market supply",
@@ -910,14 +913,14 @@ export const shopCategories: ShopCategory[] = [
     slug: "red-apple-box",
     sku: "FHM-FRT-005",
     category: "fruits",
-    name: "Red Apple Box (Seib)",
-    unit: "2 kg",
-    price: 780,
+    name: "Apple (Kala Kulu)",
+    unit: "500 g",
+    price: 329,
     popularity: 90,
     bestSellerScore: 87,
     createdAt: "2026-04-16",
     image: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=900&q=80",
-    badges: ["Fresh", "Best Seller"],
+    badges: ["Fresh", "Best Seller", "Discount"],
     shortDescription: "Crisp red apples — daily snacking favorite.",
     description: "Firm, sweet-tart red apples for snacking, lunch boxes, and juicing.",
     origin: "Swat and Gilgit orchards",
@@ -968,9 +971,10 @@ export const shopCategories: ShopCategory[] = [
     slug: "seedless-watermelon",
     sku: "FHM-FRT-008",
     category: "fruits",
-    name: "Seedless Watermelon (Tarbooz)",
-    unit: "whole",
-    price: 680,
+    name: "Watermelon",
+    unit: "pc",
+    price: 359,
+    compareAtPrice: 680,
     popularity: 93,
     bestSellerScore: 90,
     createdAt: "2026-04-20",
@@ -1064,9 +1068,9 @@ export const shopCategories: ShopCategory[] = [
     slug: "yellow-peach",
     sku: "FHM-FRT-013",
     category: "fruits",
-    name: "Yellow Peach (Aaroo)",
-    unit: "500 g",
-    price: 490,
+    name: "Peach",
+    unit: "1 kg",
+    price: 359,
     compareAtPrice: 570,
     popularity: 76,
     bestSellerScore: 72,
@@ -1374,8 +1378,8 @@ export const shopCategories: ShopCategory[] = [
     sku: "FHM-FRT-029",
     category: "fruits",
     name: "Falsa Berries",
-    unit: "250 g",
-    price: 200,
+    unit: "500 g",
+    price: 719,
     popularity: 57,
     bestSellerScore: 51,
     createdAt: "2026-04-27",
@@ -2080,8 +2084,85 @@ export const shopCategories: ShopCategory[] = [
     origin: "Local bakery selection",
     inventory: 100,
     highlights: ["Chai partner", "Sweet & Salty", "Crunchy texture"]
+  },
+  {
+    id: "gro-frozen-opa-peas",
+    slug: "opa-frozen-peas-1kg",
+    sku: "FHM-GRO-031",
+    category: "groceries",
+    name: "Opa Peas (Frozen)",
+    unit: "1 kg",
+    price: 855,
+    popularity: 64,
+    bestSellerScore: 60,
+    createdAt: "2026-05-01",
+    image: "https://images.unsplash.com/photo-1584270354949-1a9f2a4b0c2d?auto=format&fit=crop&w=900&q=80",
+    badges: [],
+    shortDescription: "Frozen garden peas — ready to cook.",
+    description: "Quick-cook frozen peas sourced for year-round convenience.",
+    origin: "Imported frozen",
+    inventory: 80,
+    highlights: ["Ready to cook", "Long shelf-life", "Ideal for pulao and sabzi"]
+  },
+  {
+    id: "gro-frozen-opa-mixveg",
+    slug: "opa-frozen-mix-500g",
+    sku: "FHM-GRO-032",
+    category: "groceries",
+    name: "Opa Mix Veg (Frozen)",
+    unit: "500 g",
+    price: 345,
+    popularity: 58,
+    bestSellerScore: 54,
+    createdAt: "2026-05-01",
+    image: "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?auto=format&fit=crop&w=900&q=80",
+    badges: [],
+    shortDescription: "Mixed frozen vegetables — convenient and versatile.",
+    description: "Mixed frozen peas, carrots, corn and beans for easy cooking.",
+    origin: "Imported frozen",
+    inventory: 60,
+    highlights: ["Convenient", "Family pack", "Quick prep"]
   }
 ];
+
+// Merge productRates into baseShopProducts: update matching product ids or add missing products.
+function mergeRates(base: ShopProduct[], rates: typeof productRates) {
+  const map = new Map<string, ShopProduct>(base.map((p) => [p.id, { ...p }]));
+
+  for (const r of rates) {
+    if (map.has(r.id)) {
+      const p = map.get(r.id)!;
+      p.price = r.price;
+      p.unit = r.unit;
+      p.name = r.name;
+    } else {
+      // create a minimal product entry for missing items
+      map.set(r.id, {
+        id: r.id,
+        slug: r.id,
+        sku: `FHM-EXT-${r.id}`,
+        category: r.category,
+        name: r.name,
+        unit: r.unit,
+        price: r.price,
+        popularity: 50,
+        bestSellerScore: 50,
+        createdAt: new Date().toISOString().slice(0, 10),
+        image: undefined,
+        badges: [],
+        shortDescription: "",
+        description: "",
+        origin: "",
+        inventory: 100,
+        highlights: []
+      });
+    }
+  }
+
+  return Array.from(map.values());
+}
+
+export const shopProducts: ShopProduct[] = mergeRates(baseShopProducts, productRates as any);
 
 export function getCategoryById(categoryId: ShopCategoryId) {
   return shopCategories.find((category) => category.id === categoryId);

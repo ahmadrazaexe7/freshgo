@@ -51,14 +51,18 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     >
       {/* Product Image Section */}
       <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-brand-50 to-brand-100/30">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
-          priority={priority}
-          className="object-cover transition-transform duration-700 group-hover:scale-110"
-        />
+        {product.image ? (
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
+            priority={priority}
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-tr from-gray-200 to-gray-300" />
+        )}
 
         {/* Badges */}
         <div className="absolute left-2 top-2 flex flex-wrap gap-1">

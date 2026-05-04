@@ -84,14 +84,18 @@ export function ProductDetailView({ slug }: { slug: string }) {
 
           <div className="overflow-hidden rounded-[2.2rem] bg-white shadow-soft">
             <div className="relative aspect-[16/12] overflow-hidden">
-              <Image
-                src={product.image}
-                alt={product.name}
-                fill
-                priority
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 55vw"
-              />
+              {product.image ? (
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 55vw"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-400" />
+              )}
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,32,24,0.03),rgba(18,32,24,0.2))]" />
               <div className="absolute left-5 top-5 flex flex-wrap gap-2">
                 <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-brand-800 shadow-sm">

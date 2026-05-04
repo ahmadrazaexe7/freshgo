@@ -513,12 +513,16 @@ function FeaturedProducts({ products }: { products: ShopProduct[] }) {
                   
                   {/* IMAGE: Minimalist frame with a very subtle inner glow */}
                   <div className="relative aspect-[1/1.2] overflow-hidden rounded-2xl bg-white/[0.03] ring-1 ring-white/10 transition-all duration-500 group-hover:ring-white/20 group-hover:shadow-[0_0_30px_rgba(0,0,0,0.4)]">
-                    <Image 
-                      src={product.image} 
-                      alt={product.name} 
-                      fill 
-                      className="object-cover transition-transform duration-1000 ease-out group-hover:scale-110" 
-                    />
+                    {product.image ? (
+                      <Image 
+                        src={product.image} 
+                        alt={product.name} 
+                        fill 
+                        className="object-cover transition-transform duration-1000 ease-out group-hover:scale-110" 
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-tr from-gray-700 to-gray-500" />
+                    )}
                     
                     {/* Floating Wishlist - Ultra Glassmorphism */}
                     <button

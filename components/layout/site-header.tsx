@@ -143,7 +143,7 @@ export function SiteHeader() {
 
           <Link href="/wishlist" className="relative p-1.5 sm:p-2.5 text-white/80 hover:text-white hover:bg-white/5 rounded-full transition flex-shrink-0">
             <Heart className="h-4 sm:h-5 w-4 sm:w-5" />
-            {wishlistCount > 0 && (
+            {mounted && wishlistCount > 0 && (
               <span className="absolute top-1 sm:top-1.5 right-1 sm:right-1.5 bg-[#D1B06B] text-[#081D18] text-[8px] sm:text-[10px] font-bold h-3.5 sm:h-4 w-3.5 sm:w-4 rounded-full flex items-center justify-center">
                 {wishlistCount}
               </span>
@@ -156,7 +156,7 @@ export function SiteHeader() {
           >
             <ShoppingCart className="h-3.5 sm:h-4.5 w-3.5 sm:w-4.5 flex-shrink-0" />
             <span className="hidden sm:inline">{formatPrice(340)}</span>
-            {cartCount > 0 && (
+            {mounted && cartCount > 0 && (
               <span className="bg-[#D1B06B] text-[#081D18] px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[10px] rounded-full">{cartCount}</span>
             )}
           </Link>

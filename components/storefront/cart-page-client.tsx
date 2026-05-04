@@ -60,7 +60,11 @@ export function CartPageClient() {
             {items.map(({ product, quantity }) => (
               <article key={product.id} className="flex flex-col gap-3 sm:gap-4 rounded-lg sm:rounded-xl lg:rounded-[1.6rem] border border-brand-100 bg-cream p-3 sm:p-4 shadow-lg hover:shadow-2xl transition-shadow sm:flex-row sm:items-center">
                 <div className="relative h-20 sm:h-24 w-full overflow-hidden rounded-lg sm:rounded-[1.25rem] bg-white sm:w-20 sm:h-20 lg:w-24 lg:h-24 flex-shrink-0">
-                  <Image src={product.image} alt={product.name} fill className="object-cover" sizes="96px" />
+                  {product.image ? (
+                    <Image src={product.image} alt={product.name} fill className="object-cover" sizes="96px" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300" />
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <Link href={`/products/${product.slug}`} className="text-base sm:text-lg font-semibold text-ink hover:text-brand-700 line-clamp-2 sm:line-clamp-1">

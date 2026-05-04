@@ -167,17 +167,19 @@ function ShopProductCard({ product, priority = false }: { product: ShopProduct; 
 
       {/* ── Image area ── */}
       <div className="relative overflow-hidden" style={{ aspectRatio: "3/2" }}>
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          sizes="(max-width: 640px) 50vw, 20vw"
-          priority={priority}
-          className="object-cover"
-          style={{ transition: "transform 0.65s cubic-bezier(0.22,1,0.36,1)" }}
-          // Use CSS group-hover via a wrapper className trick isn't available here,
-          // so we rely on the whileHover lift + the shimmer for the effect.
-        />
+        {product.image ? (
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width: 640px) 50vw, 20vw"
+            priority={priority}
+            className="object-cover"
+            style={{ transition: "transform 0.65s cubic-bezier(0.22,1,0.36,1)" }}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-tr from-[#122A18] to-[#1A3B23]" />
+        )}
         {/* Depth gradient */}
         <div
           className="absolute inset-0"

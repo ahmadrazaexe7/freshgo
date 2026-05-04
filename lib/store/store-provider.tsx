@@ -24,7 +24,7 @@ export type StoreOrderItem = {
   slug: string;
   name: string;
   unit: string;
-  image: string;
+  image?: string;
   price: number;
   quantity: number;
 };
@@ -65,7 +65,7 @@ type ProductInput = {
   unit: string;
   price: number;
   compareAtPrice?: number;
-  image: string;
+  image?: string;
   shortDescription: string;
   description: string;
   origin: string;
@@ -263,7 +263,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     const parsed = safeParseState(window.localStorage.getItem(storageKey));
     if (parsed) {
-      setState(parsed);
+      // Always use the latest shopProducts (with merged rates), but preserve user data
+      setState({
+        ...parsed,
+        products: shopProducts,
+        orders: parsed.orders.map(order => ({
+          ...order,
+          items: order.items.map(item => {
+            const updated = shopProducts.find(p => p.id === item.productId);
+            return updated ? { ...item, image: updated.image, price: updated.price } : item;
+          })
+        }))
+      });
     } else {
       // Clear potentially corrupted localStorage data
       window.localStorage.removeItem(storageKey);
