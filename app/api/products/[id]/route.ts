@@ -39,8 +39,14 @@ export async function PATCH(request: Request) {
       if (category) {
         categoryId = category.id;
       } else {
-        return Response.json({ ok: false, message: "Invalid category" }, { status: 400 });
+        console.error(`Category not found with slug: ${body.category}`);
+        return Response.json({ ok: false, message: `Invalid category: ${body.category}` }, { status: 400 });
       }
+    }
+
+    // Verify categoryId is set (required field)
+    if (!categoryId) {
+      return Response.json({ ok: false, message: "Category is required" }, { status: 400 });
     }
 
     // Prepare update data
@@ -54,13 +60,9 @@ export async function PATCH(request: Request) {
       inventory: body.inventory ? parseInt(body.inventory) : undefined,
       featured: body.featured ?? false,
       published: body.published ?? true,
-      image: body.image
+      image: body.image,
+      categoryId: categoryId
     };
-
-    // Only include categoryId if it was found or provided
-    if (categoryId) {
-      updateData.categoryId = categoryId;
-    }
 
     // Update product in database
     const updated = await db.product.update({
@@ -80,7 +82,11 @@ export async function PATCH(request: Request) {
       return Response.json({ ok: false, message: "Product not found" }, { status: 404 });
     }
     
-    return Response.json({ ok: false, message: "Failed to update product" }, { status: 500 });
+    if (error.code === "P2002") {
+      return Response.json({ ok: false, message: "Product slug must be unique" }, { status: 400 });
+    }
+    
+    return Response.json({ ok: false, message: error.message || "Failed to update product" }, { status: 500 });
   }
 }
 
