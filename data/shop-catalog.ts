@@ -2125,14 +2125,14 @@ export const shopCategories: ShopCategory[] = [
   }
 ];
 
-// Merge productRates into baseShopProducts: update matching product ids or add missing products.
-function mergeRates(base: ShopProduct[], rates: typeof productRates) {
-  const map = new Map<string, ShopProduct>(base.map((p) => [p.id, { ...p }]));
-
-  for (const r of rates) {
-    if (map.has(r.id)) {
-      const p = map.get(r.id)!;
-      p.price = r.price;
+// Image mapping for products merged from product-rates
+const productRateImages: Record<string, string> = {
+  // Vegetables
+  "veg-fresh-bean": "https://images.unsplash.com/photo-1590301157890-4810ed3521df?auto=format&fit=crop&w=900&q=80",
+  "veg-tenda": "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=900&q=80",
+  "veg-maroo": "https://images.unsplash.com/photo-1596560548464-f020f3b9ec8f?auto=format&fit=crop&w=900&q=80",
+  "veg-yam": "https://images.unsplash.com/photo-1596097635121-14b63b7a0c19?auto=format&fit=crop&w=900&q=80",
+  "veg-lettuce": "https://images.unsplash.com/photo-16222
       p.unit = r.unit;
       p.name = r.name;
     } else {
