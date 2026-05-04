@@ -1,51 +1,75 @@
-import { shopProducts } from "@/data/shop-catalog";
-
-const demoOrders = [
-  {
-    id: "FHM-24028",
-    status: "Out for delivery",
-    total: 1360,
-    city: "Islamabad",
-    area: "F-11",
-    items: [
-      { name: shopProducts[0].name, quantity: 2 },
-      { name: shopProducts[8].name, quantity: 1 }
-    ]
-  },
-  {
-    id: "FHM-24019",
-    status: "Delivered",
-    total: 1810,
-    city: "Rawalpindi",
-    area: "Bahria Town Phase 7",
-    items: [
-      { name: shopProducts[4].name, quantity: 1 },
-      { name: shopProducts[10].name, quantity: 1 }
-    ]
-  }
-];
+import { db } from "@/lib/db";
 
 export async function GET() {
-  return Response.json({
-    ok: true,
-    total: demoOrders.length,
-    orders: demoOrders
-  });
+  try {
+    const orders = await db.order.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        items: {
+          include: {
+            product: true
+          }
+        }
+      }
+    });
+
+    return Response.json({
+      ok: true,
+      total: orders.length,
+      orders
+    });
+  } catch (error) {
+    console.error("Failed to fetch orders:", error);
+    return Response.json({ ok: false, message: "Failed to fetch orders" }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  try {
+    const body = await request.json();
 
-  return Response.json(
-    {
-      ok: true,
-      message: "Demo order accepted. Persist this with Prisma and inventory logic in production.",
-      order: {
-        id: `FHM-${Math.floor(10000 + Math.random() * 89999)}`,
-        status: "Confirmed",
-        ...body
+    if (!body || !Array.isArray(body.items) || body.items.length === 0) {
+      return Response.json({ ok: false, message: "Invalid order payload" }, { status: 400 });
+    }
+
+    const orderData: any = {
+      fullName: body.fullName,
+      email: body.email,
+      phone: body.phone,
+      city: body.city,
+      area: body.area,
+      addressLine: body.addressLine,
+      notes: body.notes ?? "",
+      subtotal: parseFloat(String(body.subtotal)) ?? 0,
+      deliveryFee: parseFloat(String(body.deliveryFee)) ?? 0,
+      total: parseFloat(String(body.total)) ?? 0,
+      paymentMethod: body.paymentMethod ?? "COD",
+      whatsappOptIn: true,
+      items: {
+        create: body.items.map((item: any) => ({
+          productId: item.productId,
+          productName: item.name,
+          quantity: parseInt(String(item.quantity), 10),
+          unitPrice: parseFloat(String(item.price)),
+          lineTotal: parseFloat(String(item.price * item.quantity))
+        }))
       }
-    },
-    { status: 201 }
-  );
+    };
+
+    const order = await db.order.create({
+      data: orderData,
+      include: {
+        items: {
+          include: {
+            product: true
+          }
+        }
+      }
+    });
+
+    return Response.json({ ok: true, message: "Order created successfully", order }, { status: 201 });
+  } catch (error) {
+    console.error("Failed to create order:", error);
+    return Response.json({ ok: false, message: "Failed to create order" }, { status: 500 });
+  }
 }

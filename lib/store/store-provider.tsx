@@ -91,7 +91,7 @@ type StoreContextValue = {
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
   toggleWishlist: (productId: string) => void;
-  placeOrder: (input: CheckoutInput) => StoreOrder | null;
+  placeOrder: (input: CheckoutInput) => Promise<StoreOrder | null>;
   login: (email: string, password: string) => { ok: boolean; error?: string };
   register: (email: string, password: string, name: string, role?: UserRole) => { ok: boolean; error?: string };
   logout: () => void;
@@ -219,7 +219,7 @@ const baseState: PersistedState = {
   products: shopProducts,
   cart: [],
   wishlist: [],
-  orders: buildDemoOrders(),
+  orders: [],
   user: null,
   lastAction: null,
   orderError: null,
@@ -237,24 +237,76 @@ function safeParseState(value: string | null): PersistedState | null {
     const parsed = JSON.parse(value) as PersistedState;
 
     if (
-      !Array.isArray(parsed.products) ||
+      (parsed.products !== undefined && !Array.isArray(parsed.products)) ||
       !Array.isArray(parsed.cart) ||
       !Array.isArray(parsed.wishlist) ||
-      !Array.isArray(parsed.orders) ||
-      !Array.isArray(parsed.accounts)
+      (parsed.orders !== undefined && !Array.isArray(parsed.orders)) ||
+      (parsed.accounts !== undefined && !Array.isArray(parsed.accounts))
     ) {
       return null;
     }
 
-    // If products array is empty, treat as invalid state so we use default shopProducts
-    if (parsed.products.length === 0) {
-      return null;
-    }
-
-    return parsed;
+    return {
+      products: Array.isArray(parsed.products) ? parsed.products : [],
+      cart: parsed.cart,
+      wishlist: parsed.wishlist,
+      orders: Array.isArray(parsed.orders) ? parsed.orders : [],
+      user: parsed.user ?? null,
+      lastAction: parsed.lastAction ?? null,
+      orderError: parsed.orderError ?? null,
+      accounts: Array.isArray(parsed.accounts) ? parsed.accounts : demoUsers
+    };
   } catch {
     return null;
   }
+}
+
+const dbStatusToUi: Record<string, OrderStatus> = {
+  PENDING: "Pending",
+  CONFIRMED: "Confirmed",
+  PACKING: "Packing",
+  OUT_FOR_DELIVERY: "Out for delivery",
+  DELIVERED: "Delivered",
+  CANCELLED: "Cancelled"
+};
+
+const uiStatusToDb: Record<OrderStatus, string> = {
+  Pending: "PENDING",
+  Confirmed: "CONFIRMED",
+  Packing: "PACKING",
+  "Out for delivery": "OUT_FOR_DELIVERY",
+  Delivered: "DELIVERED",
+  Cancelled: "CANCELLED"
+};
+
+function normalizeDbOrder(order: any): StoreOrder {
+  return {
+    id: order.id,
+    createdAt: order.createdAt ? new Date(order.createdAt).toISOString() : new Date().toISOString(),
+    status: dbStatusToUi[order.status] ?? "Pending",
+    fullName: order.fullName,
+    email: order.email ?? "",
+    phone: order.phone,
+    city: order.city,
+    area: order.area,
+    addressLine: order.addressLine,
+    notes: order.notes ?? "",
+    paymentMethod: order.paymentMethod ?? "COD",
+    subtotal: Number(order.subtotal),
+    deliveryFee: Number(order.deliveryFee),
+    total: Number(order.total),
+    items: Array.isArray(order.items)
+      ? order.items.map((item: any) => ({
+          productId: item.productId,
+          slug: item.product?.slug ?? item.productId,
+          name: item.productName ?? item.product?.name ?? "Product",
+          unit: item.product?.unit ?? "",
+          image: item.product?.image ?? undefined,
+          price: Number(item.unitPrice),
+          quantity: item.quantity
+        }))
+      : []
+  };
 }
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
@@ -266,32 +318,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     const parsed = safeParseState(window.localStorage.getItem(storageKey));
     if (parsed) {
-      // Preserve user-edited products from localStorage, but update order items with latest product data
-      // Merge static shopProducts with user-edited/custom products from localStorage
-      const staticProductIds = new Set(shopProducts.map(p => p.id));
-      const customProducts = parsed.products.filter(p => !staticProductIds.has(p.id));
-      const mergedProducts = [...shopProducts, ...customProducts];
-
-      // For each product, check if there's a user-edited version in localStorage
-      const finalProducts = mergedProducts.map(merged => {
-        const edited = parsed.products.find(p => p.id === merged.id);
-        return edited || merged;
-      });
-
-      setState({
-        ...parsed,
-        products: finalProducts,
-        orders: parsed.orders.map(order => ({
-          ...order,
-          items: order.items.map(item => {
-            const updated = finalProducts.find(p => p.id === item.productId);
-            return updated ? { ...item, image: updated.image, price: updated.price } : item;
-          })
-        }))
-      });
-    } else {
-      // Clear potentially corrupted localStorage data
-      window.localStorage.removeItem(storageKey);
+      setState((current) => ({
+        ...current,
+        cart: parsed.cart,
+        wishlist: parsed.wishlist,
+        user: parsed.user,
+        lastAction: parsed.lastAction ?? current.lastAction,
+        orderError: parsed.orderError ?? current.orderError,
+        accounts: parsed.accounts ?? current.accounts
+      }));
     }
   }, []);
 
@@ -356,6 +391,35 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let mounted = true;
+
+    (async function syncOrders() {
+      try {
+        const response = await fetch("/api/orders");
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (!mounted || !data.ok || !Array.isArray(data.orders)) return;
+
+        const normalizedOrders = data.orders.map(normalizeDbOrder);
+
+        setState((current) => ({
+          ...current,
+          orders: normalizedOrders
+        }));
+      } catch (err) {
+        console.warn("Failed to sync orders from API:", err);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const stateRef = useRef(state);
 
   useEffect(() => {
@@ -367,8 +431,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    window.localStorage.setItem(storageKey, JSON.stringify(state));
-  }, [state]);
+    const persisted: PersistedState = {
+      products: [],
+      cart: state.cart,
+      wishlist: state.wishlist,
+      orders: [],
+      user: state.user,
+      lastAction: state.lastAction,
+      orderError: state.orderError,
+      accounts: state.accounts
+    };
+
+    window.localStorage.setItem(storageKey, JSON.stringify(persisted));
+  }, [state.cart, state.wishlist, state.user, state.lastAction, state.orderError, state.accounts]);
 
   useEffect(() => {
     if (!state.lastAction) {
@@ -501,9 +576,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }));
   }
 
-  function placeOrder(input: CheckoutInput) {
+  async function placeOrder(input: CheckoutInput) {
     const current = stateRef.current;
-    
+
     // Validate inventory for all items
     const inventoryErrors: string[] = [];
     for (const cartItem of current.cart) {
@@ -549,25 +624,58 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const deliveryFee = getDeliveryFee(input.city, subtotal);
     const total = subtotal + deliveryFee;
 
-    const order: StoreOrder = {
-      id: `FHM-${Math.floor(10000 + Math.random() * 89999)}`,
-      createdAt: new Date().toISOString(),
-      status: "Confirmed",
-      fullName: input.fullName,
-      email: input.email,
-      phone: input.phone,
-      city: input.city,
-      area: input.area,
-      addressLine: input.addressLine,
-      notes: input.notes,
-      paymentMethod: "COD",
-      subtotal,
-      deliveryFee,
-      total,
-      items
-    };
+    let orderFromApi: StoreOrder | null = null;
 
-    // compute streak update and message
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: input.fullName,
+          email: input.email,
+          phone: input.phone,
+          city: input.city,
+          area: input.area,
+          addressLine: input.addressLine,
+          notes: input.notes,
+          paymentMethod: "COD",
+          subtotal,
+          deliveryFee,
+          total,
+          items: items.map((item) => ({
+            productId: item.productId,
+            slug: item.slug,
+            name: item.name,
+            unit: item.unit,
+            image: item.image,
+            price: item.price,
+            quantity: item.quantity
+          }))
+        })
+      });
+
+      const result = await response.json();
+      if (!response.ok || !result.ok || !result.order) {
+        const errorMessage = result?.message || "Failed to submit order. Please try again.";
+        setState((current) => ({
+          ...current,
+          lastAction: errorMessage,
+          orderError: errorMessage
+        }));
+        return null;
+      }
+
+      orderFromApi = normalizeDbOrder(result.order);
+    } catch (err) {
+      const errorMessage = "Order submission failed. Please try again.";
+      setState((current) => ({
+        ...current,
+        lastAction: errorMessage,
+        orderError: errorMessage
+      }));
+      return null;
+    }
+
     let streakMessage = "";
     try {
       if (typeof window !== "undefined") {
@@ -629,9 +737,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setState((existing) => ({
       ...existing,
       cart: [],
-      lastAction: `Order ${order.id} placed successfully — ${streakMessage}`,
+      lastAction: `Order ${orderFromApi?.id ?? "#"} placed successfully — ${streakMessage}`,
       orderError: null,
-      orders: [order, ...existing.orders],
+      orders: orderFromApi ? [orderFromApi, ...existing.orders] : existing.orders,
       user:
         existing.user ??
         (input.email
@@ -643,7 +751,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           : null)
     }));
 
-    return order;
+    return orderFromApi;
   }
 
   function reorderOrder(orderId: string) {
@@ -719,12 +827,31 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }));
   }
 
-  function updateOrderStatus(orderId: string, status: OrderStatus) {
-    setState((current) => ({
-      ...current,
-      lastAction: `Order ${orderId} marked ${status}`,
-      orders: current.orders.map((order) => (order.id === orderId ? { ...order, status } : order))
-    }));
+  async function updateOrderStatus(orderId: string, status: OrderStatus) {
+    const apiStatus = uiStatusToDb[status] ?? status;
+
+    try {
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: apiStatus })
+      });
+
+      const result = await response.json();
+      if (!response.ok || !result.ok || !result.order) {
+        console.warn("Failed to update order status", result);
+        return;
+      }
+
+      const updatedOrder = normalizeDbOrder(result.order);
+      setState((current) => ({
+        ...current,
+        lastAction: `Order ${orderId} marked ${status}`,
+        orders: current.orders.map((order) => (order.id === orderId ? updatedOrder : order))
+      }));
+    } catch (err) {
+      console.warn("Failed to update order status", err);
+    }
   }
 
   const value = useMemo<StoreContextValue>(

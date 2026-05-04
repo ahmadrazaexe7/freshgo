@@ -119,6 +119,7 @@ model Order {
   id              String       @id @default(cuid())
   userId          String?
   fullName        String
+  email           String
   phone           String
   city            String
   area            String

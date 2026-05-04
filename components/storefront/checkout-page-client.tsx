@@ -21,6 +21,7 @@ export function CheckoutPageClient() {
     notes: ""
   });
   const [submittedOrderId, setSubmittedOrderId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const items = useMemo(
     () =>
@@ -58,14 +59,17 @@ export function CheckoutPageClient() {
     );
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setIsSubmitting(true);
 
-    const order = placeOrder(form);
+    const order = await placeOrder(form);
 
     if (order) {
       setSubmittedOrderId(order.id);
     }
+
+    setIsSubmitting(false);
   }
 
   const whatsappHref = buildWhatsAppOrderUrl({
@@ -219,9 +223,10 @@ export function CheckoutPageClient() {
 
           <button
             type="submit"
-            className="mt-8 inline-flex w-full items-center justify-center rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-brand-700"
+            disabled={isSubmitting}
+            className="mt-8 inline-flex w-full items-center justify-center rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-brand-700 disabled:bg-brand-300"
           >
-            Place order
+            {isSubmitting ? "Placing order..." : "Place order"}
           </button>
         </form>
 
