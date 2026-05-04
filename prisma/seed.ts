@@ -26,11 +26,11 @@ async function main() {
       }
     }),
     prisma.category.upsert({
-      where: { slug: "grocery" },
+      where: { slug: "groceries" },
       update: {},
       create: {
-        name: "Grocery",
-        slug: "grocery",
+        name: "Groceries",
+        slug: "groceries",
         description: "Pantry staples, grains, oils, and everyday essentials."
       }
     })
