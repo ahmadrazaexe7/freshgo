@@ -56,6 +56,7 @@ async function main() {
       if (!category) return null;
 
       return {
+        id: p.id,
         name: p.name,
         slug: p.slug,
         description: p.description || p.shortDescription || "",
