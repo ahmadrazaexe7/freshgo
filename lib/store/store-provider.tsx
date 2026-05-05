@@ -99,7 +99,7 @@ type StoreContextValue = {
   upsertProduct: (input: ProductInput) => void;
   deleteProduct: (productId: string) => void;
   refreshProducts: () => Promise<void>;
-  updateOrderStatus: (orderId: string, status: OrderStatus) => void;
+  updateOrderStatus: (orderId: string, status: OrderStatus) => Promise<boolean>;
 };
 
 type PersistedState = {
@@ -864,7 +864,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const result = await response.json();
       if (!response.ok || !result.ok || !result.order) {
         console.warn("Failed to update order status", result);
-        return;
+        return false;
       }
 
       const updatedOrder = normalizeDbOrder(result.order);
@@ -873,8 +873,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         lastAction: `Order ${orderId} marked ${status}`,
         orders: current.orders.map((order) => (order.id === orderId ? updatedOrder : order))
       }));
+      return true;
     } catch (err) {
       console.warn("Failed to update order status", err);
+      return false;
     }
   }
 

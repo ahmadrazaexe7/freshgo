@@ -46,6 +46,7 @@ const initialForm: EditableProduct = {
 
 export function AdminDashboard() {
   const { isAdmin, products, orders, upsertProduct, deleteProduct, refreshProducts, updateOrderStatus } = useStore();
+  const [orderUpdating, setOrderUpdating] = useState<Record<string, boolean>>({});
   const [streakEvents, setStreakEvents] = useState<Array<any>>([]);
   const [form, setForm] = useState<EditableProduct>(initialForm);
   const [productSearch, setProductSearch] = useState("");
@@ -648,18 +649,18 @@ export function AdminDashboard() {
                       {slugToLabel(product.category)} | {product.unit} | {formatPrice(product.price)}
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <button
                       type="button"
                       onClick={() => loadProduct(product)}
-                      className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-ink"
+                      className="w-full sm:w-auto rounded-full bg-white px-4 py-2 text-sm font-semibold text-ink"
                     >
                       Edit
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteProduct(product.id)}
-                      className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-rose-600"
+                      className="w-full sm:w-auto rounded-full bg-white px-4 py-2 text-sm font-semibold text-rose-600"
                     >
                       Delete
                     </button>
@@ -688,17 +689,29 @@ export function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-3">
                       <p className="text-sm font-semibold text-ink">{formatPrice(order.total)}</p>
-                      <select
-                        value={order.status}
-                        onChange={(event) => updateOrderStatus(order.id, event.target.value as typeof order.status)}
-                        className="rounded-full border border-brand-100 bg-white px-4 py-2 text-sm font-semibold text-ink outline-none"
-                      >
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={order.status}
+                          onChange={async (event) => {
+                            const newStatus = event.target.value as typeof order.status;
+                            setOrderUpdating((s) => ({ ...s, [order.id]: true }));
+                            const ok = await updateOrderStatus(order.id, newStatus as any);
+                            setOrderUpdating((s) => ({ ...s, [order.id]: false }));
+                            if (!ok) alert("Failed to update order status. See console for details.");
+                          }}
+                          disabled={Boolean(orderUpdating[order.id])}
+                          className="rounded-full border border-brand-100 bg-white px-4 py-2 text-sm font-semibold text-ink outline-none"
+                        >
                         {["Pending", "Confirmed", "Packing", "Out for delivery", "Delivered", "Cancelled"].map((status) => (
                           <option key={status} value={status}>
                             {status}
                           </option>
                         ))}
-                      </select>
+                        </select>
+                        {orderUpdating[order.id] ? (
+                          <div className="text-sm text-ink/60">Updating…</div>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                 </div>
