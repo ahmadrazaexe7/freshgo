@@ -25,6 +25,7 @@ export function ProductDetailView({ slug }: { slug: string }) {
   const { products, cart, addToCart, toggleWishlist, wishlist } = useStore();
   const [quantity, setQuantity] = useState(1);
   const product = products.find((entry) => entry.slug === slug);
+  const isLoading = products.length === 0;
 
   const relatedProducts = useMemo(() => {
     if (!product) {
@@ -35,6 +36,18 @@ export function ProductDetailView({ slug }: { slug: string }) {
       .filter((entry) => entry.category === product.category && entry.id !== product.id)
       .slice(0, 4);
   }, [product, products]);
+
+  if (isLoading) {
+    return (
+      <section className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:px-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-700">Loading</p>
+        <h1 className="mt-4 font-display text-4xl text-ink">Loading product details...</h1>
+        <p className="mt-4 text-base text-ink/68">
+          Fetching the latest catalog data from your connected database.
+        </p>
+      </section>
+    );
+  }
 
   if (!product) {
     return (

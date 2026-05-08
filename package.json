@@ -4,6 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "setup:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-local.ps1",
+    "setup:local:sh": "bash scripts/setup-local.sh",
+    "setup:no-docker": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-no-docker.ps1",
+    "setup:no-docker:sh": "bash scripts/setup-no-docker.sh",
     "build": "prisma db push && npm run seed && prisma generate && next build",
     "start": "next start",
     "lint": "next lint",

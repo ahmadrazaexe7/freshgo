@@ -27,7 +27,7 @@ import {
   Plus,
   Flame,
 } from "lucide-react";
-import { shopCategories, shopProducts, type ShopProduct } from "@/data/shop-catalog";
+import { shopCategories, type ShopProduct } from "@/data/shop-catalog";
 import { useStore } from "@/lib/store/store-provider";
 import { formatPrice } from "@/lib/storefront";
 import { cn } from "@/lib/utils";

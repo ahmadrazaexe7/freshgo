@@ -1,0 +1,55 @@
+﻿node.exe : npm warn cleanup Failed to remove some directories [
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn cleanu...e directories [:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\D:\\new freshgo\\freshgo\\node_modules\\lucide-react',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir 'D:\new 
+freshgo\freshgo\node_modules\lucide-react\dist\esm\icons'] {
+npm warn cleanup       errno: -4051,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'D:\\new freshgo\\freshgo\\node_modules\\lucide-react\\dist\\esm\\icons'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     'D:\\new freshgo\\freshgo\\node_modules\\lucide-react',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir 'D:\new 
+freshgo\freshgo\node_modules\lucide-react\dist\esm\icons'] {
+npm warn cleanup       errno: -4051,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'D:\\new freshgo\\freshgo\\node_modules\\lucide-react\\dist\\esm\\icons'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\D:\\new freshgo\\freshgo\\node_modules\\next',
+npm warn cleanup     [Error: EPERM: operation not permitted, rmdir 'D:\new 
+freshgo\freshgo\node_modules\next\dist\shared\lib'] {
+npm warn cleanup       errno: -4048,
+npm warn cleanup       code: 'EPERM',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'D:\\new freshgo\\freshgo\\node_modules\\next\\dist\\shared\\lib'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     'D:\\new freshgo\\freshgo\\node_modules\\next',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir 'D:\new 
+freshgo\freshgo\node_modules\next\dist\compiled'] {
+npm warn cleanup       errno: -4051,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'D:\\new freshgo\\freshgo\\node_modules\\next\\dist\\compiled'
+npm warn cleanup     }
+npm warn cleanup   ]
+npm warn cleanup ]
+npm error code ENOTEMPTY
+npm error syscall rmdir
+npm error path D:\new freshgo\freshgo\node_modules\next\dist\build\webpack\loaders
+npm error errno -4051
+npm error ENOTEMPTY: directory not empty, rmdir 'D:\new freshgo\freshgo\node_modules\next\dist\build\webpack\loaders'
+npm error A complete log of this run can be found in: C:\Users\Ahmad Raza 
+Computer\AppData\Local\npm-cache\_logs\2026-05-08T21_28_32_121Z-debug-0.log

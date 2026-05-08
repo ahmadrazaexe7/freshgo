@@ -217,7 +217,7 @@ function buildDemoOrders(): StoreOrder[] {
 }
 
 const baseState: PersistedState = {
-  products: shopProducts,
+  products: [],
   cart: [],
   wishlist: [],
   orders: [],
@@ -333,12 +333,35 @@ function normalizeDbProduct(dbProduct: any): ShopProduct {
   };
 }
 
+const REMOTE_CATALOG_URL = "https://www.freshgo.online/api/products";
+
 async function fetchProductsFromApi(): Promise<ShopProduct[]> {
-  const response = await fetch("/api/products");
-  if (!response.ok) return [];
-  const data = await response.json();
-  if (!Array.isArray(data.products)) return [];
-  return data.products.map(normalizeDbProduct);
+  const endpoints = ["/api/products", REMOTE_CATALOG_URL];
+
+  for (const url of endpoints) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.warn(`Failed to fetch products from ${url}: ${response.status}`);
+        continue;
+      }
+
+      const data = await response.json();
+      if (!Array.isArray(data.products)) {
+        console.warn(`Invalid product payload from ${url}`);
+        continue;
+      }
+
+      const products = data.products.map(normalizeDbProduct);
+      if (products.length > 0) {
+        return products;
+      }
+    } catch (error) {
+      console.warn(`Could not fetch products from ${url}:`, error);
+    }
+  }
+
+  return [];
 }
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {

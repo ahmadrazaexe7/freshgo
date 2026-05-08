@@ -22,7 +22,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 
-import { shopCategories, shopProducts, type ShopCategoryId, type ShopProduct } from "@/data/shop-catalog";
+import { shopCategories, type ShopCategoryId, type ShopProduct } from "@/data/shop-catalog";
 import { useStore } from "@/lib/store/store-provider";
 import { cn } from "@/lib/utils";
 
@@ -273,8 +273,7 @@ function ShopProductCard({ product, priority = false }: { product: ShopProduct; 
 // ─── Main ShopCatalog ──────────────────────────────────────────────────────────
 export function ShopCatalog({ initialQuery = "", initialCategory }: ShopCatalogProps) {
   const { products: storeProducts } = useStore();
-  // Fallback to direct import if store products are empty (safety net)
-  const products = storeProducts.length > 0 ? storeProducts : shopProducts;
+  const products = storeProducts;
   const hasInitialCategory = Boolean(initialCategory && shopCategories.some((c) => c.id === initialCategory));
   const preferredCategory: ShopCategoryId = hasInitialCategory ? (initialCategory as ShopCategoryId) : "vegetables";
 
