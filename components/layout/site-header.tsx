@@ -171,9 +171,15 @@ export function SiteHeader() {
             className="flex items-center gap-1.5 sm:gap-2.5 bg-white/10 hover:bg-white/20 border border-white/10 px-2.5 sm:px-5 py-1.5 sm:py-2.5 rounded-full text-white font-bold text-xs sm:text-sm transition-all active:scale-95"
           >
             <ShoppingCart className="h-3.5 sm:h-4.5 w-3.5 sm:w-4.5 flex-shrink-0" />
-            <span className="hidden sm:inline">{cartCount > 0 ? formatPrice(cartTotal) : "Cart"}</span>
-            {mounted && cartCount > 0 && (
-              <span className="bg-[#D1B06B] text-[#081D18] px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[10px] rounded-full">{cartCount}</span>
+            {mounted ? (
+              <>
+                <span className="hidden sm:inline">{cartCount > 0 ? formatPrice(cartTotal) : "Cart"}</span>
+                {cartCount > 0 && (
+                  <span className="bg-[#D1B06B] text-[#081D18] px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[10px] rounded-full">{cartCount}</span>
+                )}
+              </>
+            ) : (
+              <span className="hidden sm:inline">Cart</span>
             )}
           </Link>
         </div>

@@ -14,7 +14,10 @@ import {
   Plus,
   Search,
   ShoppingBasket,
-  X
+  X,
+  Wheat,
+  Sparkles,
+  Flame
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -36,7 +39,10 @@ type ShopCatalogProps = {
 const categoryIcons = {
   vegetables: Leaf,
   fruits: Apple,
-  groceries: ShoppingBasket
+  groceries: ShoppingBasket,
+  pulses_rice: Wheat,
+  dry_fruits: Sparkles,
+  masala: Flame
 };
 
 // ─── Design tokens ─────────────────────────────────────────────────────────────
