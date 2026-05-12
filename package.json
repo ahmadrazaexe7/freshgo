@@ -8,11 +8,12 @@
     "setup:local:sh": "bash scripts/setup-local.sh",
     "setup:no-docker": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-no-docker.ps1",
     "setup:no-docker:sh": "bash scripts/setup-no-docker.sh",
-    "build": "prisma generate && prisma db push --skip-generate && npm run seed && next build",
+    "build": "prisma generate && prisma db push --skip-generate && next build",
     "start": "next start",
     "lint": "next lint",
     "ci": "npm run lint && npm run build",
     "seed": "tsx prisma/seed.ts",
+    "seed:merge": "tsx prisma/seed-merge.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio"
