@@ -1,4 +1,4 @@
-import { shopCategories } from "@/components/data/shop-catalog";
+import { shopCategories } from "@/data/shop-catalog";
 import ProductCardServer from "./product-card-server";
 
 type Props = { products: any[]; initialQuery?: string; initialCategory?: string };
