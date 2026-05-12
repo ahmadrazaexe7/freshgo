@@ -19,6 +19,7 @@ import { formatPrice } from "@/lib/storefront";
 import { cn } from "@/lib/utils";
 import StreakModal from "./streak-modal";
 import { useStreak } from "./use-streak";
+import { CartDrawer } from "@/components/storefront/cart-drawer";
 
 export function SiteHeader() {
   const MotionHeader = motion.header as any;

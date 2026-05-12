@@ -36,6 +36,8 @@ model User {
   wishlistItems WishlistItem[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+
+  @@index([role])
 }
 
 model Account {
@@ -62,6 +64,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -81,6 +85,8 @@ model Category {
   products    Product[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  @@index([slug])
 }
 
 model Product {
@@ -102,6 +108,12 @@ model Product {
   wishlist    WishlistItem[]
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+
+  @@index([categoryId])
+  @@index([published])
+  @@index([featured])
+  @@index([slug])
+  @@index([published, categoryId])
 }
 
 model WishlistItem {
@@ -113,6 +125,7 @@ model WishlistItem {
   createdAt DateTime @default(now())
 
   @@unique([userId, productId])
+  @@index([userId])
 }
 
 model Order {
@@ -135,6 +148,11 @@ model Order {
   items           OrderItem[]
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([email])
+  @@index([createdAt])
 }
 
 model OrderItem {
@@ -147,5 +165,8 @@ model OrderItem {
   lineTotal   Decimal  @db.Decimal(10, 2)
   order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product     Product  @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
 }
 

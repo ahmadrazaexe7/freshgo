@@ -1,22 +1,24 @@
 import { db } from "@/lib/db";
 
+export const revalidate = 60; // Revalidate every 60 seconds (ISR)
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get("category");
   const search = searchParams.get("search")?.toLowerCase() ?? "";
   const sort = searchParams.get("sort") ?? "popularity";
+  const limit = Math.min(parseInt(searchParams.get("limit") ?? "100"), 1000);
+  const skip = Math.max(0, parseInt(searchParams.get("skip") ?? "0"));
 
   try {
-    // Build where clause
-    const where: any = {};
+    // Build where clause - only published products by default
+    const where: any = {
+      published: true
+    };
 
     if (category) {
-      const dbCategory = await db.category.findUnique({
-        where: { slug: category }
-      });
-      if (dbCategory) {
-        where.categoryId = dbCategory.id;
-      }
+      // Use the category slug directly if it exists
+      where.category = { slug: category };
     }
 
     if (search) {
@@ -27,7 +29,7 @@ export async function GET(request: Request) {
     }
 
     // Build order by
-    let orderBy: any = { featured: "desc" };
+    let orderBy: any = { featured: "desc", createdAt: "desc" };
     
     switch (sort) {
       case "price-low":
@@ -39,26 +41,62 @@ export async function GET(request: Request) {
       case "newest":
         orderBy = { createdAt: "desc" };
         break;
+      case "popularity":
       default:
-        orderBy = { featured: "desc" };
+        orderBy = { featured: "desc", createdAt: "desc" };
     }
 
-    const products = await db.product.findMany({
-      where,
-      orderBy,
-      include: {
-        category: true
-      }
-    });
+    // Execute both queries in parallel for better performance
+    const [products, total] = await Promise.all([
+      db.product.findMany({
+        where,
+        orderBy,
+        take: limit,
+        skip,
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          image: true,
+          price: true,
+          salePrice: true,
+          unit: true,
+          inventory: true,
+          featured: true,
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true
+            }
+          }
+        }
+      }),
+      db.product.count({ where })
+    ]);
 
-    return Response.json({
+    const response = {
       ok: true,
-      total: products.length,
+      total,
+      count: products.length,
       products
-    });
+    };
+
+    // Set cache headers for optimal performance
+    const headers = {
+      "Content-Type": "application/json",
+      "Cache-Control": search ? "private, max-age=30" : "public, max-age=300", // 5 min cache for list, 30 sec for search
+      "CDN-Cache-Control": "max-age=300"
+    };
+
+    return Response.json(response, { headers });
   } catch (error) {
     console.error("Failed to fetch products:", error);
-    return Response.json({ ok: false, message: "Failed to fetch products" }, { status: 500 });
+    return Response.json(
+      { ok: false, message: "Failed to fetch products" },
+      { status: 500, headers: { "Cache-Control": "no-cache, no-store" } }
+    );
   }
 }
 
@@ -66,17 +104,12 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    // Find category by slug if category is provided instead of categoryId
-    let categoryId = body.categoryId;
-    if (!categoryId && body.category) {
-      const category = await db.category.findUnique({
-        where: { slug: body.category }
-      });
-      if (category) {
-        categoryId = category.id;
-      } else {
-        return Response.json({ ok: false, message: "Invalid category" }, { status: 400 });
-      }
+    // Validate required fields
+    if (!body.name || !body.slug || !body.price || !body.categoryId) {
+      return Response.json(
+        { ok: false, message: "Missing required fields" },
+        { status: 400 }
+      );
     }
 
     // Create product in database
@@ -84,25 +117,48 @@ export async function POST(request: Request) {
       data: {
         name: body.name,
         slug: body.slug,
-        description: body.description,
-        image: body.image,
+        description: body.description ?? "",
+        image: body.image ?? null,
+        gallery: body.gallery ?? [],
         price: parseFloat(body.price),
         salePrice: body.salePrice ? parseFloat(body.salePrice) : null,
-        unit: body.unit,
-        inventory: parseInt(body.inventory),
+        unit: body.unit ?? "kg",
+        inventory: parseInt(body.inventory ?? "0"),
         featured: body.featured ?? false,
         published: body.published ?? true,
-        categoryId: categoryId
+        categoryId: body.categoryId
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        price: true,
+        salePrice: true,
+        category: true
       }
     });
 
-    return Response.json({
-      ok: true,
-      message: "Product created successfully",
-      product
-    });
+    return Response.json(
+      {
+        ok: true,
+        message: "Product created successfully",
+        product
+      },
+      { headers: { "Cache-Control": "no-cache, no-store" } }
+    );
   } catch (error: any) {
     console.error("Failed to create product:", error);
-    return Response.json({ ok: false, message: "Failed to create product" }, { status: 500 });
+    
+    if (error.code === "P2002") {
+      return Response.json(
+        { ok: false, message: "Product slug already exists" },
+        { status: 400 }
+      );
+    }
+
+    return Response.json(
+      { ok: false, message: "Failed to create product" },
+      { status: 500 }
+    );
   }
 }
